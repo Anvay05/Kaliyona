@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Kaliyona — Learn Kannada the Bengaluru way</title>
+    <meta name="description" content="Kaliyona helps you learn spoken Kannada the Bengaluru way through real-life street situations like auto rides, darshinis, PG talks, and office small talk." />
+    <meta name="theme-color" content="#f8f9fe" />
+    <meta property="og:title" content="Kaliyona — Learn Kannada the Bengaluru way" />
+    <meta property="og:description" content="Kaliyona helps you learn spoken Kannada the Bengaluru way through real-life street situations like auto rides, darshinis, PG talks, and office small talk." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preload" as="image" href="/assets/logo-full.webp" type="image/webp" />
+    <link rel="preload" as="image" href="/assets/logo-icon.webp" type="image/webp" />
+    <link rel="preload" as="image" href="/assets/anna/anna-avatar.webp" type="image/webp" />
+    <link rel="preload" as="image" href="/assets/anna/mouth-closed.webp" type="image/webp" />
+    <link rel="preload" as="image" href="/assets/anna/mouth-half.webp" type="image/webp" />
+    <link rel="preload" as="image" href="/assets/anna/mouth-open.webp" type="image/webp" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <script>
+      // Ignore WebSocket and @vite/client errors per AI Studio environment constraints (HMR disabled in preview iframe)
+      window.addEventListener('error', function (event) {
+        if (
+          (event.filename && event.filename.includes('@vite/client')) ||
+          (event.message && (event.message.includes('WebSocket') || event.message.includes('ws://') || event.message.includes('wss://')))
+        ) {
+          event.stopImmediatePropagation();
+          event.preventDefault();
+          return true;
+        }
+      }, true);
+      window.addEventListener('unhandledrejection', function (event) {
+        var reason = event.reason;
+        var msg = (reason && (reason.message || String(reason))) || '';
+        if (msg.includes('WebSocket') || msg.includes('ws://') || msg.includes('wss://') || msg.includes('@vite/client')) {
+          event.stopImmediatePropagation();
+          event.preventDefault();
+        }
+      }, true);
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

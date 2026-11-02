@@ -1,0 +1,165 @@
+export interface GuidedHotspot {
+  x: number;        // percent of image width (0-100)
+  y: number;        // percent of image height (0-100)
+  w: number;        // percent of image width
+  h: number;        // percent of image height
+  kn: string;
+  translit: string;
+  en: string;
+}
+
+export interface GuidedScene {
+  id: string;
+  title: string;
+  place: string;
+  imagePath: string;
+  hotspots: GuidedHotspot[];
+}
+
+export const GUIDED_SCENES: GuidedScene[] = [
+  {
+    id: 'darshini-menu',
+    title: 'Darshini Menu — Vidyarthi Bhavan',
+    place: 'Gandhi Bazaar, Basavanagudi',
+    imagePath: '/reader/menu1.jpg',
+    hotspots: [
+      { x: 10.2, y: 12.2, w: 21.5, h: 8.5, kn: 'ಉಪಹಾರ', translit: 'upahara', en: 'breakfast / light refreshments' },
+      { x: 35.2, y: 12.2, w: 13.5, h: 8.5, kn: 'ಭವನ', translit: 'bhavana', en: 'dining hall / house' },
+      { x: 67.2, y: 12.2, w: 9.0, h: 8.5, kn: 'ಬಿಸಿ', translit: 'bisi', en: 'hot / fresh' },
+      { x: 78.2, y: 12.2, w: 10.5, h: 8.5, kn: 'ತಿಂಡಿ', translit: 'thindi', en: 'tiffin / breakfast / snack' },
+      { x: 8.0, y: 27.2, w: 18.0, h: 8.5, kn: 'ಮಸಾಲೆ', translit: 'masale', en: 'spiced / masala' },
+      { x: 29.0, y: 27.2, w: 15.5, h: 8.5, kn: 'ದೋಸೆ', translit: 'dose', en: 'dosa (crispy crepe)' },
+      { x: 55.0, y: 27.2, w: 11.5, h: 9.5, kn: 'ಬೆಣ್ಣೆ', translit: 'benne', en: 'butter' },
+      { x: 71.5, y: 27.2, w: 10.5, h: 9.5, kn: 'ಇಡ್ಲಿ', translit: 'idli', en: 'steamed rice cake' },
+      { x: 8.0, y: 44.0, w: 10.0, h: 8.5, kn: 'ವಡೆ', translit: 'vade', en: 'crispy lentil donut (vada)' },
+      { x: 24.0, y: 44.0, w: 14.5, h: 8.5, kn: 'ಖಾರಾ', translit: 'khara', en: 'savory spiced semolina (upma)' },
+      { x: 42.5, y: 44.0, w: 13.5, h: 8.5, kn: 'ಬಾತ್', translit: 'bath', en: 'cooked rice / semolina dish' },
+      { x: 61.0, y: 44.0, w: 14.0, h: 8.5, kn: 'ಕೇಸರಿ', translit: 'kesari', en: 'sweet saffron semolina' },
+      { x: 8.0, y: 61.0, w: 15.5, h: 9.5, kn: 'ಫಿಲ್ಟರ್', translit: 'filter', en: 'South Indian drip filter' },
+      { x: 30.0, y: 61.0, w: 11.0, h: 8.5, kn: 'ಕಾಫಿ', translit: 'kaapi', en: 'coffee' },
+      { x: 48.5, y: 61.0, w: 12.5, h: 8.5, kn: 'ಚಹಾ', translit: 'chaha', en: 'tea' },
+      { x: 67.5, y: 61.0, w: 13.5, h: 8.5, kn: 'ಹಾಲು', translit: 'haalu', en: 'milk' },
+      { x: 8.0, y: 78.5, w: 13.5, h: 8.5, kn: 'ಊಟ', translit: 'oota', en: 'full meal / lunch / dinner' },
+      { x: 26.0, y: 78.5, w: 22.0, h: 8.5, kn: 'ಸಾಂಬಾರ್', translit: 'sambar', en: 'lentil vegetable stew' },
+      { x: 53.0, y: 78.5, w: 11.0, h: 9.5, kn: 'ಚಟ್ನಿ', translit: 'chutney', en: 'coconut condiment' },
+      { x: 71.0, y: 78.5, w: 20.0, h: 8.5, kn: 'ಪಾರ್ಸೆಲ್', translit: 'parcel', en: 'takeaway / to-go pack' },
+    ],
+  },
+  {
+    id: 'bmtc-board',
+    title: 'BMTC Bus Route Board',
+    place: 'Kempegowda Bus Station, Majestic',
+    imagePath: '/reader/bmtc-board.jpg',
+    hotspots: [
+      { x: 8.5, y: 10.5, w: 26.0, h: 8.5, kn: 'ಬೆಂಗಳೂರು', translit: 'bengaluru', en: 'Bengaluru city' },
+      { x: 41.0, y: 10.5, w: 23.0, h: 8.5, kn: 'ಮಹಾನಗರ', translit: 'mahanagara', en: 'metropolitan (BMTC)' },
+      { x: 71.5, y: 10.5, w: 15.0, h: 8.5, kn: 'ಸಾರಿಗೆ', translit: 'saarige', en: 'transport (BMTC / KSRTC)' },
+      { x: 8.0, y: 30.5, w: 24.0, h: 10.0, kn: 'ಮೆಜೆಸ್ಟಿಕ್', translit: 'majestic', en: 'Majestic central bus/metro hub' },
+      { x: 40.0, y: 30.5, w: 12.0, h: 9.0, kn: 'ಬಸ್', translit: 'bus', en: 'bus' },
+      { x: 55.5, y: 30.5, w: 18.0, h: 10.0, kn: 'ನಿಲ್ದಾಣ', translit: 'nildana', en: 'station / bus stand / stop' },
+      { x: 8.0, y: 48.5, w: 29.0, h: 10.0, kn: 'ಇಂದಿರಾನಗರ', translit: 'indiranagara', en: 'Indiranagar' },
+      { x: 48.0, y: 48.5, w: 30.5, h: 9.0, kn: 'ಕೋರಮಂಗಲ', translit: 'koramangala', en: 'Koramangala' },
+      { x: 8.0, y: 66.5, w: 23.0, h: 10.0, kn: 'ಜಯನಗರ', translit: 'jayanagara', en: 'Jayanagar' },
+      { x: 40.5, y: 66.5, w: 22.0, h: 9.0, kn: 'ಮಾರ್ಕೆಟ್', translit: 'market', en: 'KR Market / city market' },
+      { x: 69.0, y: 66.5, w: 15.0, h: 9.0, kn: 'ಟಿಕೆಟ್', translit: 'ticket', en: 'ticket' },
+      { x: 8.0, y: 81.0, w: 14.5, h: 8.5, kn: 'ಮಾರ್ಗ', translit: 'marga', en: 'route / way' },
+      { x: 30.5, y: 81.0, w: 19.0, h: 9.5, kn: 'ಸಾಮಾನ್ಯ', translit: 'samanya', en: 'ordinary / general coach' },
+      { x: 60.5, y: 81.0, w: 12.5, h: 8.0, kn: 'ಪಾಸ್', translit: 'pass', en: 'daily / monthly bus pass' },
+    ],
+  },
+  {
+    id: 'street-sign',
+    title: 'BBMP Direction & Traffic Sign',
+    place: '100 Feet Road, Indiranagar',
+    imagePath: '/reader/street-sign.jpg',
+    hotspots: [
+      { x: 9.5, y: 11.5, w: 25.5, h: 8.5, kn: 'ಬೆಂಗಳೂರು', translit: 'bengaluru', en: 'Bengaluru city' },
+      { x: 43.5, y: 11.5, w: 14.0, h: 8.5, kn: 'ಮೇನ್', translit: 'main', en: 'main road' },
+      { x: 64.0, y: 11.5, w: 11.0, h: 8.5, kn: 'ರಸ್ತೆ', translit: 'raste', en: 'road / street' },
+      { x: 8.5, y: 27.0, w: 14.0, h: 9.5, kn: 'ಎಡಕ್ಕೆ', translit: 'edakke', en: 'to the left' },
+      { x: 31.5, y: 27.0, w: 24.5, h: 9.5, kn: 'ಮಲ್ಲೇಶ್ವರಂ', translit: 'malleshwaram', en: 'Malleshwaram' },
+      { x: 68.5, y: 27.0, w: 11.0, h: 8.5, kn: 'ದಾರಿ', translit: 'daari', en: 'way / path' },
+      { x: 8.5, y: 43.0, w: 14.0, h: 10.5, kn: 'ಬಲಕ್ಕೆ', translit: 'balakke', en: 'to the right' },
+      { x: 31.5, y: 43.0, w: 17.0, h: 10.5, kn: 'ಹೆಬ್ಬಾಳ', translit: 'hebbala', en: 'Hebbal' },
+      { x: 59.5, y: 43.0, w: 17.0, h: 8.5, kn: 'ಸೇತುವೆ', translit: 'setuve', en: 'bridge / flyover' },
+      { x: 8.5, y: 58.5, w: 21.0, h: 9.0, kn: 'ನೇರವಾಗಿ', translit: 'neravagi', en: 'straight ahead' },
+      { x: 38.5, y: 58.5, w: 16.0, h: 8.5, kn: 'ವಿಧಾನ', translit: 'vidhana', en: 'Vidhana Soudha (state legislature)' },
+      { x: 61.5, y: 58.5, w: 11.5, h: 8.5, kn: 'ಸೌಧ', translit: 'soudha', en: 'capitol building (Vidhana Soudha)' },
+      { x: 8.3, y: 78.0, w: 17.5, h: 10.5, kn: 'ಎಚ್ಚರಿಕೆ', translit: 'echcharike', en: 'caution / warning' },
+      { x: 36.0, y: 78.0, w: 26.0, h: 9.5, kn: 'ನಿಧಾನವಾಗಿ', translit: 'nidhanavagi', en: 'slowly (drive slowly)' },
+      { x: 71.5, y: 78.0, w: 13.5, h: 9.5, kn: 'ಚಲಿಸಿ', translit: 'chalisi', en: 'drive / move' },
+    ],
+  },
+  {
+    id: 'metro-notice',
+    title: 'Namma Metro Platform Sign',
+    place: 'Purple Line — MG Road Station',
+    imagePath: '/reader/metro-notice.jpg',
+    hotspots: [
+      { x: 9.0, y: 11.5, w: 11.5, h: 9.0, kn: 'ನಮ್ಮ', translit: 'namma', en: 'our (Namma Metro / Bengaluru)' },
+      { x: 27.0, y: 11.5, w: 18.5, h: 9.0, kn: 'ಮೆಟ್ರೋ', translit: 'metro', en: 'Namma Metro train' },
+      { x: 54.5, y: 11.5, w: 17.5, h: 9.0, kn: 'ನಿಲ್ದಾಣ', translit: 'nildana', en: 'station / bus stand / stop' },
+      { x: 8.5, y: 28.8, w: 17.0, h: 10.2, kn: 'ಪ್ರವೇಶ', translit: 'pravesha', en: 'entry / entrance' },
+      { x: 36.0, y: 28.8, w: 20.5, h: 10.2, kn: 'ನಿರ್ಗಮನ', translit: 'nirgamana', en: 'exit / way out' },
+      { x: 67.5, y: 28.8, w: 14.5, h: 8.5, kn: 'ಮೇಲೆ', translit: 'mele', en: 'up / upstairs / above' },
+      { x: 8.5, y: 47.5, w: 15.0, h: 8.5, kn: 'ಟಿಕೆಟ್', translit: 'ticket', en: 'ticket' },
+      { x: 30.5, y: 47.5, w: 19.5, h: 8.5, kn: 'ಕೌಂಟರ್', translit: 'counter', en: 'token / billing counter' },
+      { x: 59.0, y: 47.5, w: 12.0, h: 9.5, kn: 'ಲಿಫ್ಟ್', translit: 'lift', en: 'elevator / lift' },
+      { x: 8.5, y: 65.2, w: 25.5, h: 8.5, kn: 'ಮಹಿಳೆಯರ', translit: 'mahileyara', en: 'women’s / ladies’ reserved' },
+      { x: 42.0, y: 65.2, w: 13.5, h: 8.5, kn: 'ಆಸನ', translit: 'asana', en: 'seat' },
+      { x: 63.0, y: 65.2, w: 19.5, h: 8.5, kn: 'ಮೀಸಲು', translit: 'meesalu', en: 'reserved' },
+      { x: 8.5, y: 82.2, w: 22.5, h: 8.0, kn: 'ಧೂಮಪಾನ', translit: 'dhoomapana', en: 'smoking' },
+      { x: 41.0, y: 82.2, w: 16.0, h: 8.0, kn: 'ನಿಷೇಧ', translit: 'nishedha', en: 'no / prohibited' },
+      { x: 66.0, y: 82.2, w: 17.0, h: 8.0, kn: 'ಬಾಗಿಲು', translit: 'baagilu', en: 'door / automatic doors' },
+    ],
+  },
+  {
+    id: 'shop-board',
+    title: 'Karnataka Bakery & Store Board',
+    place: '4th Block, Jayanagar',
+    imagePath: '/reader/shop-board.jpg',
+    hotspots: [
+      { x: 8.5, y: 11.5, w: 22.0, h: 9.0, kn: 'ಕರ್ನಾಟಕ', translit: 'karnataka', en: 'Karnataka state' },
+      { x: 39.0, y: 11.5, w: 16.0, h: 9.0, kn: 'ಬೇಕರಿ', translit: 'bakery', en: 'bakery & condiments' },
+      { x: 64.0, y: 11.5, w: 16.0, h: 9.0, kn: 'ಅಂಗಡಿ', translit: 'angadi', en: 'shop / store' },
+      { x: 8.5, y: 28.8, w: 16.5, h: 10.5, kn: 'ತೆರೆದಿದೆ', translit: 'theredide', en: 'open' },
+      { x: 38.5, y: 28.8, w: 10.0, h: 10.5, kn: 'ತಳ್ಳಿ', translit: 'thalli', en: 'push' },
+      { x: 57.5, y: 28.8, w: 20.5, h: 8.5, kn: 'ಎಳೆಯಿರಿ', translit: 'eleyiri', en: 'pull' },
+      { x: 8.5, y: 47.5, w: 14.0, h: 8.0, kn: 'ಹಾಲು', translit: 'haalu', en: 'milk' },
+      { x: 30.0, y: 47.5, w: 19.0, h: 8.5, kn: 'ಮೊಸರು', translit: 'mosaru', en: 'curd / yogurt' },
+      { x: 57.0, y: 47.5, w: 12.0, h: 9.5, kn: 'ತುಪ್ಪ', translit: 'tuppa', en: 'clarified butter (ghee)' },
+      { x: 75.5, y: 47.5, w: 10.0, h: 8.0, kn: 'ಸಿಹಿ', translit: 'sihi', en: 'sweet / dessert' },
+      { x: 8.5, y: 65.2, w: 21.5, h: 9.5, kn: 'ಮೈಸೂರು', translit: 'mysuru', en: 'Mysore (Mysore Pak / Masala)' },
+      { x: 37.0, y: 65.2, w: 13.0, h: 8.0, kn: 'ಪಾಕ್', translit: 'pak', en: 'gram-ghee fudge (Mysore Pak)' },
+      { x: 55.5, y: 65.2, w: 12.0, h: 8.5, kn: 'ಬನ್ಸ್', translit: 'buns', en: 'sweet banana fried bread' },
+      { x: 8.5, y: 82.0, w: 14.0, h: 8.0, kn: 'ನಗದು', translit: 'nagadu', en: 'cash' },
+      { x: 31.0, y: 82.0, w: 10.0, h: 8.0, kn: 'ಬೆಲೆ', translit: 'bele', en: 'price / rate' },
+      { x: 49.0, y: 82.0, w: 23.5, h: 8.0, kn: 'ರಿಯಾಯಿತಿ', translit: 'riyayiti', en: 'discount / concession' },
+    ],
+  },
+  {
+    id: 'temple-notice',
+    title: 'Temple Courtyard Notice Board',
+    place: 'Bull Temple Road, Basavanagudi',
+    imagePath: '/reader/temple-notice.jpg',
+    hotspots: [
+      { x: 9.0, y: 11.5, w: 23.0, h: 9.0, kn: 'ದೇವಸ್ಥಾನ', translit: 'devasthana', en: 'temple' },
+      { x: 42.5, y: 11.5, w: 16.0, h: 9.0, kn: 'ಸ್ವಾಗತ', translit: 'swagata', en: 'welcome' },
+      { x: 68.5, y: 11.5, w: 17.5, h: 9.0, kn: 'ಸೂಚನೆ', translit: 'soochane', en: 'notice / instruction' },
+      { x: 8.5, y: 29.0, w: 16.0, h: 8.5, kn: 'ದರ್ಶನ', translit: 'darshana', en: 'deity viewing / temple visit' },
+      { x: 32.0, y: 29.0, w: 18.5, h: 8.5, kn: 'ಸಮಯ', translit: 'samaya', en: 'time / schedule' },
+      { x: 55.0, y: 29.0, w: 14.0, h: 9.8, kn: 'ಬೆಳಿಗ್ಗೆ', translit: 'beligge', en: 'morning' },
+      { x: 77.0, y: 29.0, w: 13.0, h: 8.5, kn: 'ಸಂಜೆ', translit: 'sanje', en: 'evening' },
+      { x: 8.5, y: 47.2, w: 14.0, h: 8.8, kn: 'ಪೂಜೆ', translit: 'pooje', en: 'prayer / ritual offering' },
+      { x: 30.5, y: 47.2, w: 17.0, h: 9.2, kn: 'ಪ್ರಸಾದ', translit: 'prasada', en: 'blessed temple food offering' },
+      { x: 57.5, y: 47.2, w: 16.0, h: 8.5, kn: 'ಉಚಿತ', translit: 'uchita', en: 'free of charge' },
+      { x: 8.5, y: 65.2, w: 15.0, h: 9.5, kn: 'ಚಪ್ಪಲಿ', translit: 'chappali', en: 'footwear / shoes' },
+      { x: 33.0, y: 65.2, w: 10.5, h: 9.5, kn: 'ಇಲ್ಲಿ', translit: 'illi', en: 'here' },
+      { x: 50.5, y: 65.2, w: 10.0, h: 8.5, kn: 'ಬಿಡಿ', translit: 'bidi', en: 'leave / remove here' },
+      { x: 68.5, y: 65.2, w: 13.5, h: 8.5, kn: 'ಮೌನ', translit: 'mouna', en: 'silence' },
+      { x: 8.2, y: 81.8, w: 15.0, h: 10.5, kn: 'ಸ್ವಚ್ಛತೆ', translit: 'swachchate', en: 'cleanliness' },
+      { x: 35.5, y: 81.8, w: 17.0, h: 8.0, kn: 'ಕಾಪಾಡಿ', translit: 'kaapaadi', en: 'maintain / protect' },
+      { x: 61.0, y: 81.8, w: 23.0, h: 9.2, kn: 'ದಯವಿಟ್ಟು', translit: 'dayavittu', en: 'please / kindly' },
+    ],
+  },
+];

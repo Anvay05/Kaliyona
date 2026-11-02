@@ -1,0 +1,6 @@
+{
+  "name": "Kanglish — Speak Kannada, Own Bengaluru",
+  "description": "Practical spoken Kannada and Bengaluru Kanglish learning app through real-life situations like auto rides, darshinis, PG talks, and office small talk.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
