@@ -8,6 +8,7 @@ function isPlaceholderKey(val?: string): boolean {
     trimmed === 'PASTE_KEY_HERE' ||
     trimmed === 'MY_GEMINI_API_KEY' ||
     trimmed === 'YOUR_DEMO_API_KEY_HERE' ||
+    trimmed === 'YOUR_KIMI_K3_API_KEY' ||
     trimmed === '<key>' ||
     trimmed === 'YOUR_API_KEY'
   );

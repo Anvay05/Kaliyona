@@ -4,7 +4,7 @@ Practical spoken Kannada and Bengaluru Kanglish learning app built around real-l
 
 ## Hybrid Online / Offline Architecture
 
-> **Reader = Gemini Vision (online), Roleplay + Gallery + Lexicon = 100% offline.**
+> **Reader = Gemini Vision with a bundled OCR fallback; Roleplay + Gallery + Lexicon = offline-first.**
 
 - **City Reader — Live Scan (Gemini + built-in OCR)**:
   - Uses `@google/genai` (`gemini-3.8-flash` / `gemini-flash-latest`) via `/api/reader/scan` when a Gemini key is configured.
@@ -14,7 +14,7 @@ Practical spoken Kannada and Bengaluru Kanglish learning app built around real-l
 - **City Reader — Guided Gallery (100% Offline)**:
   - 6 real Bengaluru scenes (Darshini menus, BMTC bus board, Namma Metro signboard, Auto stand, and Street sign) with hand-verified interactive hotspots that work completely offline.
 - **Talk to Anna Roleplay & Lexicon**:
-  - The roleplay engine and curated Bengaluru Kannada/Kanglish lexicon run on-device. Anna uses a zero-key OpenAI-compatible endpoint by default and supports an optional custom key in Settings.
+  - The roleplay engine and curated Bengaluru Kannada/Kanglish lexicon run on-device. Anna uses the server-side Kimi K3/OpenAI-compatible provider when configured, with a browser key override available in Profile → Anna's Brain.
 
 ## Local Setup & External Hosting
 
@@ -22,11 +22,14 @@ Practical spoken Kannada and Bengaluru Kanglish learning app built around real-l
    ```bash
    npm install
    ```
-2. Optional: create `.env.local` (or set environment variables in your hosting provider such as Vercel, Netlify, or Render) with a Google AI Studio Gemini API key. Keep server-side keys private:
+2. Create `.env.local` (or set these environment variables in your hosting provider such as Vercel, Netlify, or Render). Keep both API keys server-side:
    ```bash
    GEMINI_API_KEY=<your_gemini_api_key>
+   ANNA_API_KEY=<your_kimi_k3_api_key>
+   ANNA_BASE_URL=https://api.apinex.bond/v1
+   ANNA_MODEL=free/kimi-k3
    ```
-   `VITE_GEMINI_API_KEY` is also supported for browser-side fallback, but it exposes the key to users. Built-in OCR works without either key.
+   `KIMI_API_KEY`/`KIMI_BASE_URL`/`KIMI_MODEL` are accepted aliases. `VITE_GEMINI_API_KEY` and `VITE_ANNA_DEFAULT_KEY` are also supported for local/browser fallback, but expose keys to users. Bundled Tesseract OCR works without a Gemini key.
 3. Run the development server:
    ```bash
    npm run dev

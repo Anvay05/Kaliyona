@@ -64,6 +64,7 @@ function isPlaceholderKey(val?: unknown): boolean {
     !trimmed ||
     trimmed === 'MY_GEMINI_API_KEY' ||
     trimmed === 'YOUR_DEMO_API_KEY_HERE' ||
+    trimmed === 'YOUR_KIMI_K3_API_KEY' ||
     trimmed === 'PASTE_KEY_HERE' ||
     trimmed === '<key>' ||
     trimmed === 'YOUR_API_KEY'
@@ -878,16 +879,15 @@ async function scanKannadaWithBuiltInEngine(
   const dataUrl = `data:image/jpeg;base64,${base64Jpeg}`;
 
   const { createWorker } = await import('tesseract.js');
-  let worker;
-  try {
-    worker = await createWorker(['kan', 'eng'], 1, {
-      workerPath: '/tesseract/worker.min.js',
-      corePath: '/tesseract',
-      langPath: '/tessdata',
-    });
-  } catch {
-    worker = await createWorker(['kan', 'eng']);
-  }
+  // The bundled language files are raw .traineddata files, not .gz files.
+  // Tesseract.js defaults to requesting .traineddata.gz, which made the
+  // zero-key OCR path fail before it ever reached recognition.
+  const worker = await createWorker(['kan', 'eng'], 1, {
+    workerPath: '/tesseract/worker.min.js',
+    corePath: '/tesseract',
+    langPath: '/tessdata',
+    gzip: false,
+  });
 
   try {
     const result = await worker.recognize(

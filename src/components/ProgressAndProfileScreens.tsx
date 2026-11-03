@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { resetOnboarding } from '@/lib/onboarding';
 import { NotesDeckSection } from '@/components/profile/NotesDeckSection';
+import { AiSettingsCard } from '@/components/profile/AiSettingsCard';
 import { useWallet } from '@/lib/wallet/store';
 import { STRINGS } from '@/lib/i18n';
 import { motion, useReducedMotion } from 'motion/react';
@@ -2415,6 +2416,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
           {/* Notes 🗒️ ("My Words") Word Wallet Section */}
           <NotesDeckSection />
+
+          {/* Anna provider settings — also targeted by the chat error action. */}
+          <AiSettingsCard />
 
           {/* PROFILE MASCOT CARDS: Daily Goal Ring Card + Invite/Share Card */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

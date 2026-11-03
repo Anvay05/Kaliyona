@@ -20,6 +20,8 @@ import {
   ANNA_SYSTEM_PROMPT,
   parseAnnaModelResponse,
   DEMO_KEY_LIMIT_MESSAGE,
+  getAiConfig,
+  isZeroKeyFallback,
 } from '../lib/aiConfig';
 
 export type AnnaMood = 'happy' | 'neutral' | 'excited' | 'thinking';
@@ -935,9 +937,11 @@ export async function chatWithAnna(
     return getCannedAnnaReply(trimmed, 'offline: mock mode active', persona);
   }
 
-  // 1. OpenAI-compatible AI Endpoint (User-saved key in localStorage -> else built-in default key VITE_ANNA_DEFAULT_KEY)
+  // 1. OpenAI-compatible AI endpoint. Pollinations is the only supported
+  // no-key endpoint; Kimi K3 requires a server key or a user override.
   const { apiKey: effectiveOpenAiKey } = resolveEffectiveApiKey();
-  if (effectiveOpenAiKey) {
+  const configuredBaseUrl = getAiConfig().baseUrl;
+  if (effectiveOpenAiKey || isZeroKeyFallback(configuredBaseUrl)) {
     try {
       const aiResult = await sendAnnaChatCompletion(
         trimmed,
@@ -1020,8 +1024,16 @@ export async function chatWithAnna(
         `[anna-brain] Backend HTTP ${response.status} (${response.statusText}):`,
         errText
       );
+      if ([401, 403, 429].includes(response.status)) {
+        throw new Error(
+          `ANNA_PROVIDER_HTTP_${response.status}: ${errText.slice(0, 180)}`
+        );
+      }
     }
   } catch (err: unknown) {
+    if (err instanceof Error && err.message.startsWith('ANNA_PROVIDER_HTTP_')) {
+      throw err;
+    }
     console.warn(
       '[anna-brain] Backend /api/anna/chat unreachable, trying client-side Gemini:',
       err

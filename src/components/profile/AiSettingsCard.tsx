@@ -18,6 +18,7 @@ import {
   clearAiConfig,
   testAiConnection,
   getMaskedApiKey,
+  getBuiltInDefaultApiKey,
   DEFAULT_BASE_URL,
   ANNA_MODEL,
 } from '@/lib/aiConfig';
@@ -132,6 +133,7 @@ export function AiSettingsCard() {
   };
 
   const hasCustomUserKey = Boolean(apiKey.trim());
+  const hasBuiltInClientKey = Boolean(getBuiltInDefaultApiKey());
 
   return (
     <div id="ai-settings-card" className="space-y-2">
@@ -147,7 +149,9 @@ export function AiSettingsCard() {
         ) : (
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-[11px] font-semibold">
             <CheckCircle2 size={12} className="text-indigo-600" />
-            Built-in demo key active ✓
+            {hasBuiltInClientKey
+              ? 'Built-in Anna key active ✓'
+              : 'Server key or custom key required'}
           </span>
         )}
       </div>
@@ -164,7 +168,7 @@ export function AiSettingsCard() {
                 Anna&rsquo;s Brain 🧠
               </h3>
               <p className="text-[12px] text-neutral-600 leading-tight mt-0.5">
-                Ready out-of-the-box · Optional custom API key override
+                Kimi K3 · Server key recommended
               </p>
             </div>
           </div>
@@ -188,7 +192,7 @@ export function AiSettingsCard() {
               spellCheck={false}
             />
             <p className="text-[11px] text-neutral-500">
-              OpenAI-compatible endpoint (defaults to apinex.bond)
+              OpenAI-compatible Kimi K3 endpoint. Keep the production key server-side when possible.
             </p>
           </div>
 
@@ -197,7 +201,7 @@ export function AiSettingsCard() {
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-neutral-700 flex items-center gap-1.5">
                 <Key size={13} className="text-neutral-500" />
-                API Key <span className="text-[11px] font-normal text-neutral-500">(Optional)</span>
+                API Key <span className="text-[11px] font-normal text-neutral-500">(Optional if server key is configured)</span>
               </label>
               {hasCustomUserKey && (
                 <span className="text-[11px] font-medium text-emerald-600">
@@ -210,7 +214,7 @@ export function AiSettingsCard() {
                 type={showKey ? 'text' : 'password'}
                 value={apiKey}
                 onChange={(e) => handleApiKeyChange(e.target.value)}
-                placeholder="Optional: paste your own API key override"
+                placeholder="Paste a Kimi/OpenAI-compatible key for this browser"
                 className="w-full pl-3 pr-10 py-2 rounded-xl border border-neutral-200 bg-white/90 text-[13px] text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
                 autoComplete="off"
                 spellCheck={false}
@@ -226,7 +230,7 @@ export function AiSettingsCard() {
               </button>
             </div>
             <p className="text-[11px] text-neutral-600 font-medium">
-              App runs on a built-in demo key — add your own key here only if you want
+              Add a browser key only if your host does not have ANNA_API_KEY or KIMI_API_KEY configured.
             </p>
           </div>
 
@@ -242,7 +246,7 @@ export function AiSettingsCard() {
         {testState.loading && (
           <div className="anim-panel-slide-up flex items-center gap-2 p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs">
             <Loader2 size={14} className="animate-spin text-indigo-600 shrink-0" />
-            <span>Pinging Anna on free/kimi-k3...</span>
+            <span>Pinging Anna on {ANNA_MODEL}...</span>
           </div>
         )}
 

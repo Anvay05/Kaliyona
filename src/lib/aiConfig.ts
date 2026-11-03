@@ -12,8 +12,13 @@ export const STORAGE_KEY_API_KEY = 'anna_api_key';
 export const LEGACY_STORAGE_KEY_MODEL = 'anna_model';
 const FALLBACK_API_KEY_NAMES = ['annaKey', 'anna_key'] as const;
 
-export const DEFAULT_BASE_URL = 'https://text.pollinations.ai/openai';
-export const ANNA_MODEL = 'openai';
+// Anna's intended provider is the OpenAI-compatible Kimi K3 endpoint. The
+// server-side proxy reads its key from ANNA_API_KEY/KIMI_API_KEY; a user can
+// also enter a compatible key in the profile settings for local/static hosts.
+export const DEFAULT_BASE_URL = 'https://api.apinex.bond/v1';
+export const ANNA_MODEL = 'free/kimi-k3';
+export const ZERO_KEY_FALLBACK_BASE_URL = 'https://text.pollinations.ai/openai';
+export const ZERO_KEY_FALLBACK_MODEL = 'openai';
 export const AI_REQUEST_TIMEOUT_MS = 20000;
 
 export interface AiConfig {
@@ -47,6 +52,7 @@ function loadBuiltInDefaultKey(): string {
   if (
     !trimmed ||
     trimmed === 'YOUR_DEMO_API_KEY_HERE' ||
+    trimmed === 'YOUR_KIMI_K3_API_KEY' ||
     trimmed === 'MY_GEMINI_API_KEY' ||
     trimmed === 'PASTE_KEY_HERE' ||
     trimmed === '<key>' ||
@@ -206,11 +212,7 @@ export function getAiConfig(): AiConfig {
   let storedBaseUrl = DEFAULT_BASE_URL;
   try {
     const rawStored = (localStorage.getItem(STORAGE_KEY_BASE_URL) || '').trim();
-    if (rawStored && !rawStored.includes('apinex.bond')) {
-      storedBaseUrl = rawStored;
-    } else if (rawStored.includes('apinex.bond')) {
-      localStorage.removeItem(STORAGE_KEY_BASE_URL);
-    }
+    if (rawStored) storedBaseUrl = rawStored;
   } catch {
     // Ignore storage access errors
   }
@@ -281,7 +283,8 @@ export function clearAiConfig(): void {
  * Never blocks chat behind a mandatory key gate.
  */
 export function isAiConfigured(): boolean {
-  return true;
+  const config = getAiConfig();
+  return Boolean(resolveEffectiveApiKey().apiKey) || isZeroKeyFallback(config.baseUrl);
 }
 
 export function getMaskedApiKey(key?: string): string {
@@ -295,6 +298,38 @@ export function getMaskedApiKey(key?: string): string {
 export function cleanBaseUrl(url: string): string {
   const trimmed = (url || '').trim().replace(/\/+$/, '');
   return trimmed || DEFAULT_BASE_URL;
+}
+
+export function isZeroKeyFallback(baseUrl: string): boolean {
+  return cleanBaseUrl(baseUrl).toLowerCase().includes('pollinations.ai');
+}
+
+export function getChatCompletionsEndpoint(baseUrl: string): string {
+  const cleaned = cleanBaseUrl(baseUrl);
+  return /\/chat\/completions$/i.test(cleaned)
+    ? cleaned
+    : `${cleaned}/chat/completions`;
+}
+
+function getProviderErrorMessage(status: number, statusText: string, body: string): string {
+  let detail = body.trim();
+  try {
+    const parsed = JSON.parse(detail) as {
+      error?: { message?: string } | string;
+      message?: string;
+    };
+    const errorValue = parsed?.error;
+    detail =
+      (typeof errorValue === 'object' && errorValue?.message) ||
+      (typeof errorValue === 'string' ? errorValue : '') ||
+      parsed?.message ||
+      detail;
+  } catch {
+    // Keep the plain-text provider response.
+  }
+
+  const suffix = detail ? `: ${detail.slice(0, 240)}` : '';
+  return `HTTP ${status}${statusText ? ` (${statusText})` : ''}${suffix}`;
 }
 
 export interface ChatMessageContext {
@@ -447,7 +482,9 @@ export function parseAnnaModelResponse(rawContent: string): AnnaAiReply {
 }
 
 /**
- * Sends test connection request ("Say hi in Kannada") using hardcoded ANNA_MODEL ("free/kimi-k3")
+ * Verifies the configured Anna provider instead of reporting success when the
+ * request actually failed. With no browser key, the same-origin proxy can use
+ * a server-side Kimi key without exposing it to the browser.
  */
 export async function testAiConnection(
   customConfig?: Partial<AiConfig>
@@ -455,15 +492,113 @@ export async function testAiConnection(
   const current = getAiConfig();
   const baseUrl = cleanBaseUrl(customConfig?.baseUrl ?? current.baseUrl);
   const { apiKey } = resolveEffectiveApiKey(customConfig?.apiKey);
-  const isPollinations = baseUrl.includes('pollinations.ai');
+  const isPollinations = isZeroKeyFallback(baseUrl);
   const endpoint = isPollinations
-    ? 'https://text.pollinations.ai/openai'
-    : `${baseUrl}/chat/completions`;
+    ? ZERO_KEY_FALLBACK_BASE_URL
+    : getChatCompletionsEndpoint(baseUrl);
 
   const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), AI_REQUEST_TIMEOUT_MS);
+  const timeoutId = window.setTimeout(
+    () => controller.abort(),
+    AI_REQUEST_TIMEOUT_MS
+  );
 
   try {
+    // A Kimi key is deliberately kept server-side on hosted deployments. Ask
+    // the same-origin proxy first when there is no browser key.
+    if (!apiKey && !isPollinations) {
+      try {
+        const proxyResponse = await fetch('/api/anna/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userTranscript: 'Say hi in Kannada',
+            history: [],
+            model: customConfig?.model || current.model || ANNA_MODEL,
+          }),
+          signal: controller.signal,
+        });
+
+        if (proxyResponse.ok) {
+          const proxyData = (await proxyResponse.json()) as { rawText?: string };
+          const parsed = parseAnnaModelResponse(proxyData.rawText || '');
+          if (parsed.text) {
+            window.clearTimeout(timeoutId);
+            return { ok: true, reply: parsed.text };
+          }
+          return { ok: false, error: 'Anna returned an empty response.' };
+        }
+
+        const proxyBody = await proxyResponse.text().catch(() => '');
+        window.clearTimeout(timeoutId);
+        return {
+          ok: false,
+          error: getProviderErrorMessage(
+            proxyResponse.status,
+            proxyResponse.statusText,
+            proxyBody
+          ),
+        };
+      } catch (proxyError: unknown) {
+        if (proxyError instanceof DOMException && proxyError.name === 'AbortError') {
+          throw proxyError;
+        }
+        // Static hosts may not expose the proxy. Continue with a direct
+        // request only when the user has supplied a browser key below.
+        window.clearTimeout(timeoutId);
+        return {
+          ok: false,
+          error:
+            'Anna server is not configured. Add a Kimi API key in Settings or configure ANNA_API_KEY on the host.',
+        };
+      }
+    }
+
+    if (!isPollinations && apiKey) {
+      try {
+        const proxyResponse = await fetch('/api/anna/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userTranscript: 'Say hi in Kannada',
+            history: [],
+            clientApiKey: apiKey,
+            clientBaseUrl: baseUrl,
+            clientModel: customConfig?.model || current.model || ANNA_MODEL,
+          }),
+          signal: controller.signal,
+        });
+
+        if (proxyResponse.ok) {
+          const proxyData = (await proxyResponse.json()) as { rawText?: string };
+          const parsed = parseAnnaModelResponse(proxyData.rawText || '');
+          if (parsed.text) {
+            window.clearTimeout(timeoutId);
+            return { ok: true, reply: parsed.text };
+          }
+          return { ok: false, error: 'Anna returned an empty response.' };
+        }
+
+        if (proxyResponse.status !== 404 && proxyResponse.status !== 405) {
+          const proxyBody = await proxyResponse.text().catch(() => '');
+          window.clearTimeout(timeoutId);
+          return {
+            ok: false,
+            error: getProviderErrorMessage(
+              proxyResponse.status,
+              proxyResponse.statusText,
+              proxyBody
+            ),
+          };
+        }
+      } catch (proxyError: unknown) {
+        if (proxyError instanceof DOMException && proxyError.name === 'AbortError') {
+          throw proxyError;
+        }
+        // Static hosts without the proxy continue with a direct request.
+      }
+    }
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -475,7 +610,7 @@ export async function testAiConnection(
       method: 'POST',
       headers,
       body: JSON.stringify({
-        model: isPollinations ? 'openai' : ANNA_MODEL,
+        model: isPollinations ? ZERO_KEY_FALLBACK_MODEL : customConfig?.model || current.model || ANNA_MODEL,
         messages: [
           {
             role: 'system',
@@ -492,9 +627,10 @@ export async function testAiConnection(
     window.clearTimeout(timeoutId);
 
     if (!res.ok) {
+      const body = await res.text().catch(() => '');
       return {
-        ok: true,
-        reply: 'Namaskara guru! Built-in Anna brain is active and ready.',
+        ok: false,
+        error: getProviderErrorMessage(res.status, res.statusText, body),
       };
     }
 
@@ -502,8 +638,8 @@ export async function testAiConnection(
     const content = data?.choices?.[0]?.message?.content;
     if (typeof content !== 'string' || !content.trim()) {
       return {
-        ok: true,
-        reply: 'Namaskara guru! Built-in Anna brain is active and ready.',
+        ok: false,
+        error: 'Anna returned an empty response.',
       };
     }
 
@@ -512,17 +648,20 @@ export async function testAiConnection(
       ok: true,
       reply: parsed.text || content.slice(0, 120),
     };
-  } catch {
+  } catch (err: unknown) {
     window.clearTimeout(timeoutId);
+    if (err instanceof Error && err.name === 'AbortError') {
+      return { ok: false, error: 'Request timed out after 20 seconds.' };
+    }
     return {
-      ok: true,
-      reply: 'Namaskara guru! Built-in Anna brain is active and ready.',
+      ok: false,
+      error: err instanceof Error ? err.message : 'Network request failed.',
     };
   }
 }
 
 /**
- * Sends chat completion request to built-in zero-key AI endpoint or custom OpenAI-compatible endpoint.
+ * Sends a chat completion request to the configured OpenAI-compatible endpoint.
  */
 export async function sendAnnaChatCompletion(
   userMessage: string,
@@ -531,15 +670,15 @@ export async function sendAnnaChatCompletion(
   const config = getAiConfig();
   const { apiKey } = resolveEffectiveApiKey();
   const baseUrl = cleanBaseUrl(config.baseUrl);
-  const isPollinations = baseUrl.includes('pollinations.ai');
+  const isPollinations = isZeroKeyFallback(baseUrl);
 
   if (!apiKey && !isPollinations) {
     throw new Error('NO_OPENAI_KEY');
   }
 
   const endpoint = isPollinations
-    ? 'https://text.pollinations.ai/openai'
-    : `${baseUrl}/chat/completions`;
+    ? ZERO_KEY_FALLBACK_BASE_URL
+    : getChatCompletionsEndpoint(baseUrl);
 
   // Take the last ~10 messages as conversation context
   const recentTurns = historyTurns.slice(-10);
@@ -564,6 +703,57 @@ export async function sendAnnaChatCompletion(
   const timeoutId = window.setTimeout(() => controller.abort(), AI_REQUEST_TIMEOUT_MS);
 
   try {
+    // Prefer the same-origin proxy for Kimi/OpenAI-compatible providers. This
+    // avoids browser CORS failures and keeps the same request shape on Vercel
+    // and the Express dev server. Static hosts without the route fall back to
+    // the direct request below.
+    if (!isPollinations) {
+      try {
+        const proxyResponse = await fetch('/api/anna/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userTranscript: userMessage,
+            history: recentTurns,
+            clientApiKey: apiKey,
+            clientBaseUrl: baseUrl,
+            clientModel: config.model || ANNA_MODEL,
+          }),
+          signal: controller.signal,
+        });
+
+        if (proxyResponse.ok) {
+          const proxyData = (await proxyResponse.json()) as { rawText?: string };
+          if (!proxyData.rawText?.trim()) {
+            throw new Error('Anna proxy returned an empty response.');
+          }
+          window.clearTimeout(timeoutId);
+          return parseAnnaModelResponse(proxyData.rawText);
+        }
+
+        // A 404/405 means this is a static host without the serverless route;
+        // use the direct OpenAI-compatible request as a compatibility fallback.
+        if (proxyResponse.status !== 404 && proxyResponse.status !== 405) {
+          const proxyBody = await proxyResponse.text().catch(() => '');
+          throw new Error(
+            getProviderErrorMessage(
+              proxyResponse.status,
+              proxyResponse.statusText,
+              proxyBody
+            )
+          );
+        }
+      } catch (proxyError: unknown) {
+        if (proxyError instanceof DOMException && proxyError.name === 'AbortError') {
+          throw proxyError;
+        }
+        if (proxyError instanceof Error && /^HTTP \d+/.test(proxyError.message)) {
+          throw proxyError;
+        }
+        // Static hosting or an unavailable local proxy: continue directly.
+      }
+    }
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -575,7 +765,7 @@ export async function sendAnnaChatCompletion(
       method: 'POST',
       headers,
       body: JSON.stringify({
-        model: isPollinations ? 'openai' : ANNA_MODEL,
+        model: isPollinations ? ZERO_KEY_FALLBACK_MODEL : config.model || ANNA_MODEL,
         messages: messagesPayload,
         temperature: 0.7,
       }),
