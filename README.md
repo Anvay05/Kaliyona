@@ -1,13 +1,13 @@
 # Kaliyona — Speak Kannada Bengaluru Style
 
-Practical spoken Kannada & Bengaluru Kanglish learning app built around real-life situations (auto rides, darshinis, PG conversations, office small talk, and street signs).
+Practical spoken Kannada & Bengaluru Kannada learning app built around real-life situations (auto rides, darshinis, PG conversations, office small talk, and street signs).
 
 ## Hybrid Online / Offline Architecture
 
 > **Reader = Gemini Vision (online), Roleplay + Gallery + Lexicon = 100% offline.**
 
 - **City Reader — Live Scan (Online, Gemini Vision)**:
-  - Uses `gemini-1.5-flash` via REST (`lib/reader/gemini.ts`) to detect Kannada words/phrases, Latin transliteration, concise English meaning, and normalized `[ymin, xmin, ymax, xmax]` bounding boxes in a single shot.
+  - Uses `gemini-3.8-flash` via REST (`lib/reader/gemini.ts`) to detect Kannada words/phrases, Latin transliteration, concise English meaning, and normalized `[ymin, xmin, ymax, xmax]` bounding boxes in a single shot.
   - Renders in-place, auto-fitted translations over the original photo with a `[Translate | Original]` toggle and a portaled word-practice popover (`Bol ke sunao` + `Use in Roleplay`).
   - Automatically falls back to a graceful offline notice card (`City Reader ko internet chahiye 🌐 Roleplay + Gallery offline chalte hain — woh try karo!`) with direct shortcuts to **Guided Gallery** and **Roleplay** when `navigator.onLine === false` or `VITE_GEMINI_API_KEY` is missing.
 - **City Reader — Guided Gallery (100% Offline)**:
