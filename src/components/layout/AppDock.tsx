@@ -23,6 +23,7 @@ import {
   Plus,
   Target,
   ScanLine,
+  MessageCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -127,6 +128,7 @@ export interface AppDockProps {
 export function AppDock({
   activeTab,
   onSelectTab,
+  onOpenChat,
   onOpenReader,
 }: AppDockProps) {
   const reduce = useReducedMotion() ?? false;
@@ -203,9 +205,15 @@ export function AppDock({
   );
 
   const handleSpeedDialAction = React.useCallback(
-    (target: 'reader' | 'practice') => {
+    (target: 'chat' | 'reader' | 'practice') => {
       setDialOpen(false);
-      if (target === 'reader') {
+      if (target === 'chat') {
+        if (onOpenChat) {
+          onOpenChat();
+        } else if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('kaliyona:open-anna'));
+        }
+      } else if (target === 'reader') {
         if (onOpenReader) {
           onOpenReader();
         } else if (typeof window !== 'undefined') {
@@ -220,7 +228,7 @@ export function AppDock({
         navigate('practice', '/practice');
       }
     },
-    [navigate, onOpenReader],
+    [navigate, onOpenChat, onOpenReader],
   );
 
   const isActive = (item: (typeof ITEMS)[number]) => {
@@ -256,6 +264,13 @@ export function AppDock({
   );
 
   const SPEED_DIAL_ACTIONS = [
+    {
+      label: 'Talk to Anna',
+      sublabel: 'Voice Kannada tutor',
+      target: 'chat' as const,
+      icon: MessageCircle,
+      iconSize: 18,
+    },
     {
       label: 'Scan Kannada',
       sublabel: 'Translate signs & menus',

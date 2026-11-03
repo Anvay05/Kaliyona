@@ -67,7 +67,7 @@ export default async function handler(req: any, res: any) {
 
     const ai = getGenAIClient(clientApiKey);
     if (!ai) {
-      res.status(503).json({ error: 'Gemini API key not configured' });
+      res.status(200).json({ fallback: true, rawText: '' });
       return;
     }
 

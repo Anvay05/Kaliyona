@@ -30,7 +30,6 @@ import {
 } from 'lucide-react';
 import { resetOnboarding } from '@/lib/onboarding';
 import { NotesDeckSection } from '@/components/profile/NotesDeckSection';
-import { AiSettingsCard } from '@/components/profile/AiSettingsCard';
 import { useWallet } from '@/lib/wallet/store';
 import { STRINGS } from '@/lib/i18n';
 import { motion, useReducedMotion } from 'motion/react';
@@ -2185,7 +2184,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     setEditing(false);
   };
 
-  const INVITE_SHARE_URL = 'https://kaliyona1.netlify.app';
+  const INVITE_SHARE_URL = 'https://kaliyona.vercel.app';
 
   const handleShareInvite = () => {
     playTactileTone('success');
@@ -2476,7 +2475,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               <div className="relative z-10 min-w-0 flex-1 space-y-2">
                 <div>
                   <span className="mono-label text-[var(--accent2)] !text-[10px] block">
-                    INVITE &amp; SHARE · KALIYONA1.NETLIFY.APP
+                    INVITE &amp; SHARE · KALIYONA.VERCEL.APP
                   </span>
                   <p className="font-display font-bold text-base text-[var(--ink)] leading-snug">
                     Share Kaliyona with friends
@@ -2484,7 +2483,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   <p className="text-xs text-[var(--muted)]">
                     Invite friends at{' '}
                     <span className="font-mono-accent font-semibold text-primary">
-                      kaliyona1.netlify.app
+                      kaliyona.vercel.app
                     </span>
                   </p>
                 </div>
@@ -2495,7 +2494,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 >
                   <span>
                     {inviteCopied
-                      ? '✓ kaliyona1.netlify.app Copied!'
+                      ? '✓ kaliyona.vercel.app Copied!'
                       : 'Share Invite Link'}
                   </span>
                 </button>
@@ -2580,9 +2579,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               </div>
             </div>
           </div>
-
-          {/* AI SETTINGS CARD */}
-          <AiSettingsCard />
 
           {/* Menu List */}
           <div className="glass-strong relative overflow-hidden divide-y divide-[var(--line)]">

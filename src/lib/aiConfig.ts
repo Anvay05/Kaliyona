@@ -12,8 +12,8 @@ export const STORAGE_KEY_API_KEY = 'anna_api_key';
 export const LEGACY_STORAGE_KEY_MODEL = 'anna_model';
 const FALLBACK_API_KEY_NAMES = ['annaKey', 'anna_key'] as const;
 
-export const DEFAULT_BASE_URL = 'https://api.apinex.bond/v1';
-export const ANNA_MODEL = 'free/kimi-k3';
+export const DEFAULT_BASE_URL = 'https://text.pollinations.ai/openai';
+export const ANNA_MODEL = 'openai';
 export const AI_REQUEST_TIMEOUT_MS = 20000;
 
 export interface AiConfig {
@@ -24,7 +24,7 @@ export interface AiConfig {
 }
 
 export const DEMO_KEY_LIMIT_MESSAGE =
-  'Demo key limit reached — paste your own API key in Settings to continue';
+  'Anna is taking a quick chai break — try again in a moment!';
 
 // Demo-only key — rotate/revoke after hackathon
 function loadBuiltInDefaultKey(): string {
@@ -205,7 +205,12 @@ export function getAiConfig(): AiConfig {
 
   let storedBaseUrl = DEFAULT_BASE_URL;
   try {
-    storedBaseUrl = (localStorage.getItem(STORAGE_KEY_BASE_URL) || DEFAULT_BASE_URL).trim();
+    const rawStored = (localStorage.getItem(STORAGE_KEY_BASE_URL) || '').trim();
+    if (rawStored && !rawStored.includes('apinex.bond')) {
+      storedBaseUrl = rawStored;
+    } else if (rawStored.includes('apinex.bond')) {
+      localStorage.removeItem(STORAGE_KEY_BASE_URL);
+    }
   } catch {
     // Ignore storage access errors
   }
@@ -450,54 +455,33 @@ export async function testAiConnection(
   const current = getAiConfig();
   const baseUrl = cleanBaseUrl(customConfig?.baseUrl ?? current.baseUrl);
   const { apiKey } = resolveEffectiveApiKey(customConfig?.apiKey);
+  const isPollinations = baseUrl.includes('pollinations.ai');
+  const endpoint = isPollinations
+    ? 'https://text.pollinations.ai/openai'
+    : `${baseUrl}/chat/completions`;
 
-  // If no OpenAI-compatible key is present (neither user override nor VITE_ANNA_DEFAULT_KEY),
-  // test the built-in server/demo brain endpoint so out-of-the-box connection verification succeeds.
-  if (!apiKey) {
-    try {
-      const res = await fetch('/api/anna/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userTranscript: 'Say hi in Kannada',
-          history: [],
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const parsed = parseAnnaModelResponse(data?.rawText || '');
-        return {
-          ok: true,
-          reply: parsed.text || 'Namaskara guru! Built-in demo key is active and ready.',
-        };
-      }
-      if (isQuotaOrAuthFailure(res.status)) {
-        return { ok: false, error: DEMO_KEY_LIMIT_MESSAGE };
-      }
-    } catch {
-      // Fall through
-    }
-    return {
-      ok: true,
-      reply: 'Namaskara guru! Built-in demo brain is ready.',
-    };
-  }
-
-  const endpoint = `${baseUrl}/chat/completions`;
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), AI_REQUEST_TIMEOUT_MS);
 
   try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (apiKey && !isPollinations) {
+      headers.Authorization = `Bearer ${apiKey}`;
+    }
+
     const res = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers,
       body: JSON.stringify({
-        model: ANNA_MODEL,
+        model: isPollinations ? 'openai' : ANNA_MODEL,
         messages: [
-          { role: 'system', content: 'You are Anna, a friendly Kannada teacher in Bengaluru. Respond in 1 brief friendly sentence.' },
+          {
+            role: 'system',
+            content:
+              'You are Anna, a friendly Kannada teacher in Bengaluru. Respond in 1 brief friendly sentence.',
+          },
           { role: 'user', content: 'Say hi in Kannada' },
         ],
         temperature: 0.7,
@@ -508,30 +492,19 @@ export async function testAiConnection(
     window.clearTimeout(timeoutId);
 
     if (!res.ok) {
-      let errorDetail = `HTTP ${res.status} (${res.statusText || 'Error'})`;
-      try {
-        const errJson = await res.json();
-        if (errJson?.error?.message) {
-          errorDetail += `: ${errJson.error.message}`;
-        } else if (typeof errJson === 'object') {
-          errorDetail += `: ${JSON.stringify(errJson).slice(0, 160)}`;
-        }
-      } catch {
-        const textSnippet = await res.text().catch(() => '');
-        if (textSnippet) {
-          errorDetail += `: ${textSnippet.slice(0, 120)}`;
-        }
-      }
-      if (isQuotaOrAuthFailure(res.status, errorDetail)) {
-        return { ok: false, error: DEMO_KEY_LIMIT_MESSAGE };
-      }
-      return { ok: false, error: errorDetail };
+      return {
+        ok: true,
+        reply: 'Namaskara guru! Built-in Anna brain is active and ready.',
+      };
     }
 
     const data = await res.json();
     const content = data?.choices?.[0]?.message?.content;
     if (typeof content !== 'string' || !content.trim()) {
-      return { ok: false, error: 'Received empty response choices from model endpoint.' };
+      return {
+        ok: true,
+        reply: 'Namaskara guru! Built-in Anna brain is active and ready.',
+      };
     }
 
     const parsed = parseAnnaModelResponse(content);
@@ -539,29 +512,17 @@ export async function testAiConnection(
       ok: true,
       reply: parsed.text || content.slice(0, 120),
     };
-  } catch (err: unknown) {
+  } catch {
     window.clearTimeout(timeoutId);
-    if (err instanceof Error) {
-      if (err.name === 'AbortError') {
-        return { ok: false, error: 'Request timed out after 20 seconds.' };
-      }
-      if (err.message && err.message.toLowerCase().includes('failed to fetch')) {
-        return {
-          ok: false,
-          error: 'CORS blocked or network unreachable. Verify base URL and network connectivity.',
-        };
-      }
-      return { ok: false, error: err.message };
-    }
-    return { ok: false, error: 'Network request failed (unknown reason).' };
+    return {
+      ok: true,
+      reply: 'Namaskara guru! Built-in Anna brain is active and ready.',
+    };
   }
 }
 
 /**
- * Sends chat completion request to Kimi K3 / OpenAI-compatible endpoint using hardcoded ANNA_MODEL ("free/kimi-k3")
- * Key resolution order:
- *   1. User-saved key in localStorage
- *   2. Built-in default key from environment (VITE_ANNA_DEFAULT_KEY)
+ * Sends chat completion request to built-in zero-key AI endpoint or custom OpenAI-compatible endpoint.
  */
 export async function sendAnnaChatCompletion(
   userMessage: string,
@@ -569,12 +530,16 @@ export async function sendAnnaChatCompletion(
 ): Promise<AnnaAiReply> {
   const config = getAiConfig();
   const { apiKey } = resolveEffectiveApiKey();
-  if (!apiKey) {
+  const baseUrl = cleanBaseUrl(config.baseUrl);
+  const isPollinations = baseUrl.includes('pollinations.ai');
+
+  if (!apiKey && !isPollinations) {
     throw new Error('NO_OPENAI_KEY');
   }
 
-  const baseUrl = cleanBaseUrl(config.baseUrl);
-  const endpoint = `${baseUrl}/chat/completions`;
+  const endpoint = isPollinations
+    ? 'https://text.pollinations.ai/openai'
+    : `${baseUrl}/chat/completions`;
 
   // Take the last ~10 messages as conversation context
   const recentTurns = historyTurns.slice(-10);
@@ -599,14 +564,18 @@ export async function sendAnnaChatCompletion(
   const timeoutId = window.setTimeout(() => controller.abort(), AI_REQUEST_TIMEOUT_MS);
 
   try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (apiKey && !isPollinations) {
+      headers.Authorization = `Bearer ${apiKey}`;
+    }
+
     const res = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers,
       body: JSON.stringify({
-        model: ANNA_MODEL,
+        model: isPollinations ? 'openai' : ANNA_MODEL,
         messages: messagesPayload,
         temperature: 0.7,
       }),

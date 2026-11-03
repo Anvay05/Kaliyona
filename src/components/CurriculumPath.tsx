@@ -599,9 +599,17 @@ export const CurriculumPath: React.FC<CurriculumPathProps> = ({
           playTactileTone('tap');
           setIsTalkToAnnaOpen(true);
         }}
-        className="fixed bottom-28 right-4 z-40 md:bottom-8 md:right-6 max-w-[240px] h-14 px-7 rounded-full bg-primary-container text-on-primary font-label-bold uppercase tracking-wider flex items-center gap-2.5 shadow-[0_4px_0_0_#5341cd] active:translate-y-1 active:shadow-none cursor-pointer whitespace-nowrap touch-manipulation"
+        className="fixed bottom-28 right-4 z-40 md:bottom-8 md:right-6 max-w-[240px] h-14 pl-3 pr-6 rounded-full bg-primary-container text-on-primary font-label-bold uppercase tracking-wider flex items-center gap-2.5 shadow-[0_4px_0_0_#5341cd] active:translate-y-1 active:shadow-none cursor-pointer whitespace-nowrap touch-manipulation"
         aria-label="Talk to Anna"
       >
+        <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20 overflow-hidden border border-white/40">
+          <img
+            src="/anna-avatar.webp"
+            alt=""
+            className="h-full w-full object-cover"
+          />
+          <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-primary-container" />
+        </span>
         <span>Talk to Anna</span>
       </button>
 

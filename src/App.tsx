@@ -650,6 +650,7 @@ function AppShell() {
 
           {/* Right: Streak Flame, Avatar */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+
             {/* Streak Flame */}
             <button
               type="button"
@@ -863,6 +864,33 @@ function AppShell() {
           setIsTalkToAnnaOpen(true);
         }}
       />
+
+      {/* ================================================================= */}
+      {/* FLOATING TALK TO ANNA BUTTON (RIGHT SIDE, ABOVE FOOTER DOCK)      */}
+      {/* ================================================================= */}
+      {!isTalkToAnnaOpen && !isCityReaderOpen && !lessonRoute && (
+        <button
+          type="button"
+          onClick={() => {
+            playTactileTone('tap');
+            setIsTalkToAnnaOpen(true);
+          }}
+          aria-label="Talk to Anna"
+          className="fixed right-4 sm:right-6 bottom-[calc(var(--nav-occupied-space,84px)+12px)] md:bottom-8 z-30 flex items-center gap-2 pl-2 pr-4 py-2 rounded-full bg-primary text-white font-label-bold text-xs sm:text-sm cursor-pointer shadow-[0_4px_0_0_#5341cd,0_10px_24px_rgba(91,72,229,0.32)] border border-white/25 hover:brightness-105 active:translate-y-[2px] active:shadow-[0_2px_0_0_#5341cd] transition-all touch-manipulation"
+        >
+          <span className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 overflow-hidden border border-white/40">
+            <img
+              src="/anna-avatar.webp"
+              alt=""
+              className="h-full w-full object-cover"
+            />
+            <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-primary" />
+          </span>
+          <span className="whitespace-nowrap font-extrabold tracking-tight">
+            Talk to Anna
+          </span>
+        </button>
+      )}
 
       {/* ================================================================= */}
       {/* FLOATING APP DOCK (MOBILE ONLY: <768px)                           */}

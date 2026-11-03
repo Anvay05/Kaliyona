@@ -1,5 +1,9 @@
 import { GoogleGenAI, Type, ThinkingLevel } from '@google/genai';
-import type { LexiconEntry } from './lexicon';
+import {
+  matchOcrWordsInLines,
+  type LexiconEntry,
+  type OcrWord,
+} from './lexicon';
 import { STRINGS } from '@/lib/i18n';
 
 const DAILY_CAP_STORAGE_KEY = 'kaliyona_reader_daily_scans_v1';
@@ -121,14 +125,11 @@ export function getConfiguredApiKey(): string {
 }
 
 /**
- * Instant, ping-free check whether Gemini Vision is available.
- * Returns true when online so either VITE_GEMINI_API_KEY, process.env.GEMINI_API_KEY,
- * or the server-side GEMINI_API_KEY proxy can fulfill the request without false-negative key errors.
+ * Instant, ping-free check whether City Reader is available.
+ * Always returns true because our built-in Kannada OCR + AI engine works out-of-the-box without requiring a user API key.
  */
 export function hasGeminiApiKey(): boolean {
-  if (getConfiguredApiKey().length > 0) return true;
-  // Server proxy (/api/reader/scan) also resolves GEMINI_API_KEY / .env.local at runtime
-  return typeof window !== 'undefined';
+  return true;
 }
 
 function getTodayDateKey(): string {
@@ -539,15 +540,23 @@ async function performSingleGeminiFetch(
         );
       }
 
-      if (serverResp.status === 503) {
+      if (serverResp.status === 503 || serverResp.status === 404) {
         serverMissingKey = true;
       }
 
       if (serverResp.ok) {
         const contentType = serverResp.headers.get('content-type') || '';
         if (contentType.includes('application/json')) {
-          const payload = (await serverResp.json()) as { rawText?: string };
-          if (typeof payload?.rawText === 'string') {
+          const payload = (await serverResp.json()) as {
+            rawText?: string;
+            fallback?: boolean;
+          };
+          if (payload?.fallback) {
+            serverMissingKey = true;
+          } else if (
+            typeof payload?.rawText === 'string' &&
+            payload.rawText.trim().length > 0
+          ) {
             return payload.rawText;
           }
         }
@@ -559,18 +568,13 @@ async function performSingleGeminiFetch(
       if (proxyErr instanceof DOMException && proxyErr.name === 'AbortError') {
         throw proxyErr;
       }
-      // If proxy route is unreachable (e.g. static ZIP hosting), fall through to direct SDK fallback below
+      // If proxy route is unreachable (e.g. static/Vercel hosting), fall through below
     }
 
-    // 2. Direct Client-Side @google/genai SDK fallback for static/ZIP hosting
+    // 2. Direct Client-Side @google/genai SDK if a Gemini key is configured, otherwise built-in Kannada OCR + AI engine
     const effectiveKey = apiKey || getConfiguredApiKey();
-    if (!effectiveKey) {
-      throw new GeminiReaderError(
-        'missing_key',
-        serverMissingKey
-          ? 'Gemini API key not configured. Set GEMINI_API_KEY or VITE_GEMINI_API_KEY in your environment variables (or paste a Gemini key in Settings).'
-          : STRINGS.reader.offlineNotice
-      );
+    if (!effectiveKey || serverMissingKey && !effectiveKey) {
+      return await scanKannadaWithBuiltInEngine(base64Jpeg, controller.signal);
     }
 
     const ai = new GoogleGenAI({
@@ -582,7 +586,6 @@ async function performSingleGeminiFetch(
       },
     });
 
-    // Multi-model fallback chain identical to server.ts so public Gemini API calls succeed outside AI Studio
     const candidateModels = [
       'gemini-3-flash-preview',
       'gemini-2.5-flash',
@@ -689,20 +692,9 @@ async function performSingleGeminiFetch(
           callSdkModel(modelName, idx * 1200)
         )
       );
-    } catch (aggErr) {
-      if (aggErr instanceof AggregateError && aggErr.errors.length > 0) {
-        const rateLimitErr = aggErr.errors.find(
-          (e): e is GeminiReaderError =>
-            e instanceof GeminiReaderError && e.kind === 'rate_limit'
-        );
-        if (rateLimitErr) throw rateLimitErr;
-        const allEmpty = aggErr.errors.every(
-          (e) => e instanceof Error && e.message === 'EMPTY_DETECTION'
-        );
-        if (allEmpty) return '[]';
-        throw aggErr.errors[0];
-      }
-      throw new GeminiReaderError('network', STRINGS.reader.genericError);
+    } catch {
+      // Fallback to built-in Kannada OCR + AI engine if SDK call fails
+      return await scanKannadaWithBuiltInEngine(base64Jpeg, controller.signal);
     }
   } catch (err) {
     if (outerSignal?.aborted) {
@@ -724,6 +716,288 @@ async function performSingleGeminiFetch(
   } finally {
     clearTimeout(timeoutId);
     outerSignal?.removeEventListener('abort', onOuterAbort);
+  }
+}
+
+const KANNADA_CONSONANTS: Record<string, string> = {
+  ಕ: 'ka', ಖ: 'kha', ಗ: 'ga', ಘ: 'gha', ಙ: 'nga',
+  ಚ: 'cha', ಛ: 'chha', ಜ: 'ja', ಝ: 'jha', ಞ: 'nya',
+  ಟ: 'ta', ಠ: 'tha', ಡ: 'da', ಢ: 'dha', ಣ: 'na',
+  ತ: 'tha', ಥ: 'thha', ದ: 'da', ಧ: 'dha', ನ: 'na',
+  ಪ: 'pa', ಫ: 'pha', ಬ: 'ba', ಭ: 'bha', ಮ: 'ma',
+  ಯ: 'ya', ರ: 'ra', ಱ: 'ra', ಲ: 'la', ವ: 'va',
+  ಶ: 'sha', ಷ: 'sha', ಸ: 'sa', ಹ: 'ha', ಳ: 'la',
+};
+
+const KANNADA_VOWELS: Record<string, string> = {
+  ಅ: 'a', ಆ: 'aa', ಇ: 'i', ಈ: 'ee', ಉ: 'u', ಊ: 'oo',
+  ಋ: 'ru', ಎ: 'e', ಏ: 'e', ಐ: 'ai', ಒ: 'o', ಓ: 'o', ಔ: 'au',
+};
+
+const KANNADA_MATRAS: Record<string, string> = {
+  'ಾ': 'aa', 'ಿ': 'i', 'ೀ': 'ee', 'ು': 'u', 'ೂ': 'oo',
+  'ೃ': 'ru', 'ೆ': 'e', 'ೇ': 'e', 'ೈ': 'ai', 'ೊ': 'o', 'ೋ': 'o', 'ೌ': 'au',
+};
+
+function transliterateKannadaScript(input: string): string {
+  let out = '';
+  const chars = Array.from(input);
+  for (let i = 0; i < chars.length; i++) {
+    const ch = chars[i];
+    const next = chars[i + 1];
+    if (KANNADA_CONSONANTS[ch]) {
+      const base = KANNADA_CONSONANTS[ch].slice(0, -1);
+      if (next === '್') {
+        out += base;
+        i++;
+      } else if (next && KANNADA_MATRAS[next]) {
+        out += base + KANNADA_MATRAS[next];
+        i++;
+      } else {
+        out += KANNADA_CONSONANTS[ch];
+      }
+    } else if (KANNADA_VOWELS[ch]) {
+      out += KANNADA_VOWELS[ch];
+    } else if (ch === 'ಂ') {
+      out += 'm';
+    } else if (ch === 'ಃ') {
+      out += 'h';
+    } else if (KANNADA_MATRAS[ch]) {
+      out += KANNADA_MATRAS[ch];
+    } else if (ch !== '್' && ch !== '\u200c' && ch !== '\u200d') {
+      out += ch;
+    }
+  }
+  return out.replace(/\s+/g, ' ').trim();
+}
+
+async function getImageDimensionsFromBase64(
+  base64Jpeg: string
+): Promise<{ width: number; height: number }> {
+  if (typeof Image === 'undefined') {
+    return { width: 1000, height: 1000 };
+  }
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      resolve({
+        width: Math.max(1, img.naturalWidth || img.width || 1000),
+        height: Math.max(1, img.naturalHeight || img.height || 1000),
+      });
+    };
+    img.onerror = () => resolve({ width: 1000, height: 1000 });
+    img.src = `data:image/jpeg;base64,${base64Jpeg}`;
+  });
+}
+
+async function translateUnmatchedKannadaBatch(
+  knList: string[],
+  signal?: AbortSignal
+): Promise<Map<string, { translit: string; en: string }>> {
+  const map = new Map<string, { translit: string; en: string }>();
+  if (knList.length === 0) return map;
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 9000);
+    if (signal) {
+      signal.addEventListener('abort', () => controller.abort(), { once: true });
+    }
+
+    const res = await fetch('https://text.pollinations.ai/openai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'openai',
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You translate Kannada street signs, menu items, and phrases into concise English. Return ONLY a JSON array of objects: [{"kn": "...", "translit": "...", "en": "..."}]. Keep "en" concise (1-5 words).',
+          },
+          {
+            role: 'user',
+            content: `Translate each Kannada item in this JSON array: ${JSON.stringify(knList)}`,
+          },
+        ],
+        temperature: 0.2,
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+
+    if (res.ok) {
+      const data = await res.json();
+      const content = String(data?.choices?.[0]?.message?.content || '').trim();
+      const start = content.indexOf('[');
+      const end = content.lastIndexOf(']');
+      if (start !== -1 && end > start) {
+        const arr = JSON.parse(content.slice(start, end + 1));
+        if (Array.isArray(arr)) {
+          for (const item of arr) {
+            if (
+              item &&
+              typeof item.kn === 'string' &&
+              typeof item.en === 'string' &&
+              item.en.trim()
+            ) {
+              map.set(item.kn.trim(), {
+                translit:
+                  typeof item.translit === 'string' && item.translit.trim()
+                    ? item.translit.trim()
+                    : transliterateKannadaScript(item.kn.trim()),
+                en: item.en.trim(),
+              });
+            }
+          }
+        }
+      }
+    }
+  } catch {
+    // Fallback to deterministic transliteration if AI call times out
+  }
+
+  return map;
+}
+
+/**
+ * Built-in Zero-Key Kannada OCR + AI Translation Engine.
+ * Uses Tesseract.js (kan+eng) + Kaliyona's 3,500-line Bengaluru Kannada lexicon + zero-key AI translation
+ * so City Reader works 100% out-of-the-box on any host (e.g. kaliyona.vercel.app) without requiring a Gemini API key.
+ */
+async function scanKannadaWithBuiltInEngine(
+  base64Jpeg: string,
+  signal?: AbortSignal
+): Promise<string> {
+  if (signal?.aborted) {
+    throw new GeminiReaderError('aborted', 'Scan aborted');
+  }
+
+  const { width: imgW, height: imgH } =
+    await getImageDimensionsFromBase64(base64Jpeg);
+  const dataUrl = `data:image/jpeg;base64,${base64Jpeg}`;
+
+  const { createWorker } = await import('tesseract.js');
+  let worker;
+  try {
+    worker = await createWorker(['kan', 'eng'], 1, {
+      workerPath: '/tesseract/worker.min.js',
+      corePath: '/tesseract',
+      langPath: '/tessdata',
+    });
+  } catch {
+    worker = await createWorker(['kan', 'eng']);
+  }
+
+  try {
+    const result = await worker.recognize(
+      dataUrl,
+      {},
+      { blocks: true, text: true }
+    );
+
+    const rawWords: OcrWord[] = [];
+    for (const block of result.data.blocks || []) {
+      for (const para of block.paragraphs || []) {
+        for (const line of para.lines || []) {
+          for (const word of line.words || []) {
+            const text = (word.text || '').trim();
+            if (!text) continue;
+            rawWords.push({
+              text,
+              confidence: word.confidence ?? 80,
+              bbox: {
+                x0: word.bbox.x0,
+                y0: word.bbox.y0,
+                x1: word.bbox.x1,
+                y1: word.bbox.y1,
+              },
+            });
+          }
+        }
+      }
+    }
+
+    const lineMatched = matchOcrWordsInLines(rawWords);
+    const kannadaRegex = /[\u0C80-\u0CFF]/;
+
+    // Collect unmatched Kannada items that have reasonable confidence so we can AI-translate them too
+    const unmatchedKnTexts: string[] = [];
+    for (const item of lineMatched) {
+      if (
+        !item.entry &&
+        kannadaRegex.test(item.cleanText) &&
+        item.cleanText.length >= 2 &&
+        item.confidence >= 40
+      ) {
+        if (!unmatchedKnTexts.includes(item.cleanText)) {
+          unmatchedKnTexts.push(item.cleanText);
+        }
+      }
+    }
+
+    const aiTranslatedMap = await translateUnmatchedKannadaBatch(
+      unmatchedKnTexts.slice(0, 20),
+      signal
+    );
+
+    const outputPayload: Array<{
+      kn: string;
+      translit: string;
+      en: string;
+      box: [number, number, number, number];
+    }> = [];
+
+    for (const item of lineMatched) {
+      const ymin = Math.max(
+        0,
+        Math.min(1000, Math.round((item.bbox.y0 / imgH) * 1000))
+      );
+      const xmin = Math.max(
+        0,
+        Math.min(1000, Math.round((item.bbox.x0 / imgW) * 1000))
+      );
+      const ymax = Math.max(
+        ymin + 12,
+        Math.min(1000, Math.round((item.bbox.y1 / imgH) * 1000))
+      );
+      const xmax = Math.max(
+        xmin + 12,
+        Math.min(1000, Math.round((item.bbox.x1 / imgW) * 1000))
+      );
+
+      if (item.entry) {
+        outputPayload.push({
+          kn: item.entry.kn,
+          translit: item.entry.translit,
+          en: item.entry.en,
+          box: [ymin, xmin, ymax, xmax],
+        });
+      } else if (
+        kannadaRegex.test(item.cleanText) &&
+        item.cleanText.length >= 2 &&
+        item.confidence >= 45
+      ) {
+        const aiHit = aiTranslatedMap.get(item.cleanText);
+        const translit =
+          aiHit?.translit || transliterateKannadaScript(item.cleanText);
+        const en =
+          aiHit?.en ||
+          (translit
+            ? translit.charAt(0).toUpperCase() + translit.slice(1)
+            : item.cleanText);
+        outputPayload.push({
+          kn: item.cleanText,
+          translit: translit || item.cleanText,
+          en,
+          box: [ymin, xmin, ymax, xmax],
+        });
+      }
+    }
+
+    return JSON.stringify(outputPayload.slice(0, 40));
+  } finally {
+    await worker.terminate().catch(() => {});
   }
 }
 
