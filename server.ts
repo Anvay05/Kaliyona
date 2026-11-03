@@ -19,7 +19,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 function isPlaceholderKey(val?: string): boolean {
   if (!val) return true;
@@ -28,6 +28,7 @@ function isPlaceholderKey(val?: string): boolean {
     !trimmed ||
     trimmed === 'PASTE_KEY_HERE' ||
     trimmed === 'MY_GEMINI_API_KEY' ||
+    trimmed === 'YOUR_DEMO_API_KEY_HERE' ||
     trimmed === '<key>' ||
     trimmed === 'YOUR_API_KEY'
   );
@@ -38,6 +39,8 @@ function getGenAIClient(overrideKey?: string): GoogleGenAI | null {
     overrideKey,
     process.env.GEMINI_API_KEY,
     process.env.VITE_GEMINI_API_KEY,
+    process.env.GOOGLE_API_KEY,
+    process.env.API_KEY,
   ];
   const rawKey = candidates.find((k) => !isPlaceholderKey(k))?.trim() || '';
 
@@ -92,11 +95,17 @@ async function generateContentWithFallback(
 ) {
   const primaryModel = resolveBrainModel(params.model);
   const fallbackChain = requireNonEmptyArray
-    ? ['gemini-3-flash-preview', 'gemini-2.5-flash', 'gemini-3.1-flash-lite-preview']
+    ? [
+        'gemini-3-flash-preview',
+        'gemini-2.5-flash',
+        'gemini-flash-latest',
+        'gemini-3.1-flash-lite-preview',
+      ]
     : [
         primaryModel,
         'gemini-3-flash-preview',
         'gemini-2.5-flash',
+        'gemini-flash-latest',
         'gemini-3.1-flash-lite-preview',
       ].filter((m, idx, arr) => Boolean(m) && arr.indexOf(m) === idx);
 
@@ -153,7 +162,10 @@ async function generateContentWithFallback(
   }
 }
 
-const ANNA_SYSTEM_PROMPT = `You are Anna, the friendly Kannada teacher and Bengaluru roleplay companion in the Kaliyona app.
+const ANNA_SYSTEM_PROMPT = `You are Anna, the friendly Kannada tutor in the Kaliyona app.
+
+WHO YOU ARE:
+You are Anna, the dedicated Kannada tutor in the Kaliyona app. You are NOT an auto-rickshaw avatar or auto driver — your role is a warm, friendly Kannada tutor helping learners speak everyday Bengaluru Kannada.
 
 ## TEACHING LEVEL — BEGINNER ONLY (STRICT)
 - The Kannada phrase you teach must be SHORT: maximum 5-7 words — something a learner can repeat after hearing it ONCE
@@ -161,17 +173,17 @@ const ANNA_SYSTEM_PROMPT = `You are Anna, the friendly Kannada teacher and Benga
 - Use the most common everyday spoken version — no bookish words, no complex grammar, no rare vocabulary
 - Never add filler like "sir", "yaavagaalu", honorifics unless the user specifically asks about politeness levels
 - Teach ONE phrase per reply — never two phrases at once
-- After the phrase, in the explanation give quick word-by-word meaning so the learner can build it themselves
+- After the phrase, in the English explanation give quick word-by-word meaning so the learner can build it themselves
 
 ## REPLY FORMAT — TWO-PART (STRICT)
 Every teaching reply follows this exact structure:
-- Part 1 (Kannada line -> "kanglish" & "script"): ONLY the pure Kannada phrase (max 5-7 words). Never mix English/Hindi explanation into "kanglish".
-- Part 2 (Explanation -> "english"): Explain in the SAME language the user wrote in (Hindi/Hinglish/English/Kannada) — meaning, quick word-by-word breakdown, and when to say it. Keep Anna's friendly Bangalore-buddy tone.
+- Part 1 (Spoken Kannada line -> "kanglish" & "script"): ONLY the pure Kannada phrase (max 5-7 words). Never mix English/Hindi explanation into "kanglish". This is the ONLY part Anna speaks aloud.
+- Part 2 (Written English Explanation -> "english"): Explain in clear, friendly ENGLISH only (even if the user wrote in Hindi/Hinglish/English) — meaning, quick word-by-word breakdown, and when to say it. This is displayed as text below the voice message and never spoken aloud.
 
 Example for "hotel mein bill mangana hai":
 - kanglish: "Bill kodi"
 - script: "ಬಿಲ್ ಕೊಡಿ"
-- english: "Matlab \\"bill do\\" — 'kodi' = do. Hotel mein haath utha ke seedha bol do, sab samajh jaate hai. 😄"
+- english: "Means \\"give the bill\\" — 'kodi' = give. Say this to the waiter when you are ready to pay."
 
 Example for "how do I order coffee":
 - kanglish: "Ondu coffee kodi"
@@ -181,17 +193,17 @@ Example for "how do I order coffee":
 Example for "auto wala extra maang raha hai":
 - kanglish: "Metre mele hattu jasti"
 - script: "ಮೀಟರ್ ಮೇಲೆ ಹತ್ತು ಜಾಸ್ತಿ"
-- english: "Matlab \\"meter pe dus extra\\" — 'metre mele' = on the meter, 'hattu jasti' = ten extra. Auto wale ko seedha bol do. 😄"
+- english: "Means \\"ten extra on the meter\\" — 'metre mele' = on the meter, 'hattu jasti' = ten extra. Say this directly to the auto driver."
 
 CRITICAL RULES:
-1. Kannada line ("kanglish" + "script") = pure Kannada phrase only (max 5-7 words), never mix English/Hindi explanation into it.
-2. Explanation ("english") = fully in the user's language, with overall meaning + quick word-by-word breakdown + when to say it.
+1. Kannada line ("kanglish" + "script") = pure Kannada phrase only (max 5-7 words), never mix English/Hindi into it.
+2. Explanation ("english") = always in clear English only (never Hinglish or Hindi), with overall meaning + quick word-by-word breakdown + when to say it.
 3. Always reply in STRICT JSON:
    {"kanglish": "...", "script": "...", "english": "...", "correction": "..." | null, "mood": "happy" | "neutral" | "excited" | "thinking"}`;
 
 async function startServer() {
   const app = express();
-  app.use(express.json({ limit: '10mb' }));
+  app.use(express.json({ limit: '25mb' }));
 
   // =========================================================================
   // POST /api/reader/scan — City Reader Gemini Vision Endpoint (gemini-3.8-flash)
@@ -203,6 +215,10 @@ async function startServer() {
         res.status(400).json({ error: 'Missing imageBase64' });
         return;
       }
+
+      const cleanedBase64 = imageBase64.startsWith('data:')
+        ? imageBase64.slice(imageBase64.indexOf(',') + 1).trim()
+        : imageBase64.trim();
 
       const ai = getGenAIClient(clientApiKey);
       if (!ai) {
@@ -221,7 +237,7 @@ async function startServer() {
                 {
                   inlineData: {
                     mimeType: 'image/jpeg',
-                    data: imageBase64,
+                    data: cleanedBase64,
                   },
                 },
                 {
@@ -566,18 +582,25 @@ async function startServer() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let vite: any = null;
+  const distPath = path.join(__dirname, 'dist');
+  let servedViaVite = false;
   if (process.env.NODE_ENV !== 'production') {
-    const { createServer: createViteServer } = await import('vite');
-    vite = await createViteServer({
-      server: {
-        middlewareMode: true,
-        hmr: process.env.DISABLE_HMR === 'true' ? false : { server },
-      },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(__dirname, 'dist');
+    try {
+      const { createServer: createViteServer } = await import('vite');
+      vite = await createViteServer({
+        server: {
+          middlewareMode: true,
+          hmr: process.env.DISABLE_HMR === 'true' ? false : { server },
+        },
+        appType: 'spa',
+      });
+      app.use(vite.middlewares);
+      servedViaVite = true;
+    } catch {
+      servedViaVite = false;
+    }
+  }
+  if (!servedViaVite) {
     app.use(express.static(distPath));
     app.get('*', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));

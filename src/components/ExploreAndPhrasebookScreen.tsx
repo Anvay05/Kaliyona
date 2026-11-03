@@ -188,13 +188,18 @@ export const ExploreAndPhrasebookScreen: React.FC<
     const isPlaying = speakingCardId === phrase.id;
     return (
       <div
-        key={phrase.id}
+        key={`${selectedUnitFilter}-${phrase.id}`}
+        style={
+          {
+            '--stagger-delay': `${Math.min(cardIndex * 45, 180)}ms`,
+          } as React.CSSProperties
+        }
         onClick={() => handlePlayPhrase(phrase)}
         onContextMenu={(e) => {
           e.preventDefault();
           handlePlayPhrase(phrase);
         }}
-        className={`relative overflow-hidden w-full p-4 sm:p-5 rounded-2xl border transition-all flex items-center justify-between gap-3 sm:gap-4 cursor-pointer select-none bg-[var(--surface)] hover:border-[var(--accent)] hover:shadow-md ${
+        className={`anim-stagger-item relative overflow-hidden w-full p-4 sm:p-5 rounded-2xl border transition-all flex items-center justify-between gap-3 sm:gap-4 cursor-pointer select-none bg-[var(--surface)] hover:border-[var(--accent)] hover:shadow-md ${
           isSaved
             ? 'border-[var(--accent2)]/60'
             : 'border-[var(--line)]'

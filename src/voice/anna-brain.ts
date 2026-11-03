@@ -216,37 +216,34 @@ export function getCannedAnnaReply(
     return pickCannedVariant('who_are_you', [
       {
         kanglish:
-          'Naanu Anna guru! Ee app-ina talking avatar and nimma auto dost!',
-        script:
-          'ನಾನು ಅಣ್ಣ ಗುರು! ಈ ಆಪ್ ನ ಟಾಕಿಂಗ್ ಅವತಾರ್ ಅಂಡ್ ನಿಮ್ಮ ಆಟೋ ದೋಸ್ತ್!',
+          '"Naanu Anna, nimma Kannada tutor" (ನಾನು ಅಣ್ಣ, ನಿಮ್ಮ ಕನ್ನಡ ಟ್ಯೂಟರ್)',
+        script: 'ನಾನು ಅಣ್ಣ, ನಿಮ್ಮ ಕನ್ನಡ ಟ್ಯೂಟರ್',
         english:
-          "I'm Anna — this app's talking avatar and your auto dost! I look like a cute Bengaluru auto to make learning fun.",
+          'Means "I am Anna, your Kannada tutor" — \'naanu\' = I, \'nimma\' = your. I am your Kannada tutor in the Kaliyona app!',
         reply:
-          'Naanu Anna guru! Ee app-ina talking avatar and nimma auto dost!',
+          '"Naanu Anna, nimma Kannada tutor" (ನಾನು ಅಣ್ಣ, ನಿಮ್ಮ ಕನ್ನಡ ಟ್ಯೂಟರ್)',
         correction: null,
         mood: 'happy',
       },
       {
         kanglish:
-          'Naanu nimma virtual Kanglish guru Anna! Yellow-and-green auto avatar naanu!',
-        script:
-          'ನಾನು ನಿಮ್ಮ ವರ್ಚುವಲ್ ಕಾಂಗ್ಲಿಷ್ ಗುರು ಅಣ್ಣ! ಯೆಲ್ಲೋ ಅಂಡ್ ಗ್ರೀನ್ ಆಟೋ ಅವತಾರ್ ನಾನು!',
+          '"Naanu Kaliyona Kannada shikshaki" (ನಾನು ಕಲಿಯೋಣ ಕನ್ನಡ ಶಿಕ್ಷಕಿ)',
+        script: 'ನಾನು ಕಲಿಯೋಣ ಕನ್ನಡ ಶಿಕ್ಷಕಿ',
         english:
-          "I'm your virtual Kanglish guide Anna! A cheerful yellow-and-green auto mascot here to chat and teach.",
+          'Means "I am the Kaliyona Kannada teacher" — \'naanu\' = I, \'shikshaki\' = teacher. Ask me anything you want to learn in Kannada!',
         reply:
-          'Naanu nimma virtual Kanglish guru Anna! Yellow-and-green auto avatar naanu!',
+          '"Naanu Kaliyona Kannada shikshaki" (ನಾನು ಕಲಿಯೋಣ ಕನ್ನಡ ಶಿಕ್ಷಕಿ)',
         correction: null,
         mood: 'excited',
       },
       {
         kanglish:
-          'Anna naanu! Ee app-ina friendly auto avatar — illi nimage Kannada helikododu nanna kelsa!',
-        script:
-          'ಅಣ್ಣ ನಾನು! ಈ ಆಪ್ ನ ಫ್ರೆಂಡ್ಲಿ ಆಟೋ ಅವತಾರ್ — ಇಲ್ಲಿ ನಿಮಗೆ ಕನ್ನಡ ಹೇಳಿಕೊಡೋದು ನನ್ನ ಕೆಲಸ!',
+          '"Naanu nimma Kannada guru Anna" (ನಾನು ನಿಮ್ಮ ಕನ್ನಡ ಗುರು ಅಣ್ಣ)',
+        script: 'ನಾನು ನಿಮ್ಮ ಕನ್ನಡ ಗುರು ಅಣ್ಣ',
         english:
-          "I'm Anna! This app's friendly auto avatar — teaching you Kannada while chatting is my passion!",
+          'Means "I am your Kannada teacher Anna" — \'naanu\' = I, \'nimma\' = your, \'guru\' = teacher/guide in the Kaliyona app.',
         reply:
-          'Anna naanu! Ee app-ina friendly auto avatar — illi nimage Kannada helikododu nanna kelsa!',
+          '"Naanu nimma Kannada guru Anna" (ನಾನು ನಿಮ್ಮ ಕನ್ನಡ ಗುರು ಅಣ್ಣ)',
         correction: null,
         mood: 'happy',
       },
@@ -261,30 +258,22 @@ export function getCannedAnnaReply(
   ) {
     return pickCannedVariant('how_are_you', [
       {
-        kanglish: 'Naanu chennagidini guru! Neevu hegiddira?',
-        script: 'ನಾನು ಚೆನ್ನಾಗಿದ್ದೀನಿ ಗುರು! ನೀವು ಹೇಗಿದ್ದೀರಾ?',
-        english: "I'm fine! How are you? ('chennagidini' = I'm fine)",
-        reply: 'Naanu chennagidini guru! Neevu hegiddira?',
+        kanglish: '"Naanu chennagidini! Neevu hegiddira?" (ನಾನು ಚೆನ್ನಾಗಿದ್ದೀನಿ! ನೀವು ಹೇಗಿದ್ದೀರಾ?)',
+        script: 'ನಾನು ಚೆನ್ನಾಗಿದ್ದೀನಿ! ನೀವು ಹೇಗಿದ್ದೀರಾ?',
+        english:
+          'Means "I am fine! How are you?" — \'chennagidini\' = I am fine, \'hegiddira\' = how are you.',
+        reply: '"Naanu chennagidini! Neevu hegiddira?" (ನಾನು ಚೆನ್ನಾಗಿದ್ದೀನಿ! ನೀವು ಹೇಗಿದ್ದೀರಾ?)',
         correction: null,
         mood: 'happy',
       },
       {
-        kanglish: 'Full kushi aagidini guru! Nimma dina hegidde?',
-        script: 'ಫುಲ್ ಖುಷಿ ಆಗಿದ್ದೀನಿ ಗುರು! ನಿಮ್ಮ ದಿನ ಹೇಗಿತ್ತು?',
-        english: "I'm doing great friend! How has your day been?",
-        reply: 'Full kushi aagidini guru! Nimma dina hegidde?',
+        kanglish: '"Tumba chennagidini!" (ತುಂಬಾ ಚೆನ್ನಾಗಿದ್ದೀನಿ!)',
+        script: 'ತುಂಬಾ ಚೆನ್ನಾಗಿದ್ದೀನಿ!',
+        english:
+          'Means "I am doing very well!" — \'tumba\' = very, \'chennagidini\' = doing well.',
+        reply: '"Tumba chennagidini!" (ತುಂಬಾ ಚೆನ್ನಾಗಿದ್ದೀನಿ!)',
         correction: null,
         mood: 'excited',
-      },
-      {
-        kanglish: 'Tumba chennagidini guru! Kannada practice-ge ready ideera?',
-        script: 'ತುಂಬಾ ಚೆನ್ನಾಗಿದ್ದೀನಿ ಗುರು! ಕನ್ನಡ ಪ್ರಾಕ್ಟೀಸ್ ಗೆ ರೆಡಿ ಇದ್ದೀರಾ?',
-        english:
-          "I'm doing very well friend! Are you ready for some Kannada chat?",
-        reply:
-          'Tumba chennagidini guru! Kannada practice-ge ready ideera?',
-        correction: null,
-        mood: 'happy',
       },
     ]);
   }
@@ -297,28 +286,13 @@ export function getCannedAnnaReply(
   ) {
     return pickCannedVariant('name', [
       {
-        kanglish: 'Nanna hesaru Anna! Ee app-ina auto dost!',
-        script: 'ನನ್ನ ಹೆಸರು ಅಣ್ಣ! ಈ ಆಪ್ ನ ಆಟೋ ದೋಸ್ತ್!',
-        english: "My name is Anna! This app's auto friend!",
-        reply: 'Nanna hesaru Anna! Ee app-ina auto dost!',
+        kanglish: '"Nanna hesaru Anna" (ನನ್ನ ಹೆಸರು ಅಣ್ಣ)',
+        script: 'ನನ್ನ ಹೆಸರು ಅಣ್ಣ',
+        english:
+          'Means "My name is Anna" — \'nanna\' = my, \'hesaru\' = name. I am your Kannada tutor in the Kaliyona app!',
+        reply: '"Nanna hesaru Anna" (ನನ್ನ ಹೆಸರು ಅಣ್ಣ)',
         correction: null,
         mood: 'happy',
-      },
-      {
-        kanglish: 'Ellaru nanna Auto Anna anta karithare guru!',
-        script: 'ಎಲ್ಲರೂ ನನ್ನ ಆಟೋ ಅಣ್ಣ ಅಂತ ಕರೀತಾರೆ ಗುರು!',
-        english: 'Everyone calls me Auto Anna, friend!',
-        reply: 'Ellaru nanna Auto Anna anta karithare guru!',
-        correction: null,
-        mood: 'happy',
-      },
-      {
-        kanglish: 'Nanna hesaru Anna — nimma Bengaluru auto companion!',
-        script: 'ನನ್ನ ಹೆಸರು ಅಣ್ಣ — ನಿಮ್ಮ ಬೆಂಗಳೂರು ಆಟೋ ಕಾಂಪ್ಯಾನಿಯನ್!',
-        english: 'My name is Anna — your Bengaluru auto companion!',
-        reply: 'Nanna hesaru Anna — nimma Bengaluru auto companion!',
-        correction: null,
-        mood: 'excited',
       },
     ]);
   }
@@ -329,31 +303,13 @@ export function getCannedAnnaReply(
   ) {
     return pickCannedVariant('thanks', [
       {
-        kanglish: 'Parvagilla guru! Kushi aagi kaliyiri!',
-        script: 'ಪರವಾಗಿಲ್ಲ ಗುರು! ಖುಷಿ ಆಗಿ ಕಲಿಯಿರಿ!',
-        english: 'No problem friend! Learn happily!',
-        reply: 'Parvagilla guru! Kushi aagi kaliyiri!',
+        kanglish: '"Parvagilla! Kushi aagi kaliyiri" (ಪರವಾಗಿಲ್ಲ! ಖುಷಿ ಆಗಿ ಕಲಿಯಿರಿ)',
+        script: 'ಪರವಾಗಿಲ್ಲ! ಖುಷಿ ಆಗಿ ಕಲಿಯಿರಿ',
+        english:
+          'Means "No problem! Learn happily" — \'parvagilla\' = no problem/welcome, \'kaliyiri\' = learn.',
+        reply: '"Parvagilla! Kushi aagi kaliyiri" (ಪರವಾಗಿಲ್ಲ! ಖುಷಿ ಆಗಿ ಕಲಿಯಿರಿ)',
         correction: null,
         mood: 'happy',
-      },
-      {
-        kanglish: 'Dhanyavada nimage kooda guru! Eega innu swalpa matanadona?',
-        script: 'ಧನ್ಯವಾದ ನಿಮಗೂ ಕೂಡ ಗುರು! ಈಗ ಇನ್ನೂ ಸ್ವಲ್ಪ ಮಾತಾಡೋಣ?',
-        english:
-          'Thank you to you too friend! Shall we chat a bit more?',
-        reply:
-          'Dhanyavada nimage kooda guru! Eega innu swalpa matanadona?',
-        correction: null,
-        mood: 'happy',
-      },
-      {
-        kanglish: 'Mention maadbidi guru, naavu Bengaluru dosti alva!',
-        script: 'ಮೆನ್ಷನ್ ಮಾಡ್ಬೇಡಿ ಗುರು, ನಾವು ಬೆಂಗಳೂರು ದೋಸ್ತಿ ಅಲ್ವಾ!',
-        english:
-          "Don't mention it friend, we're Bengaluru buddies after all!",
-        reply: 'Mention maadbidi guru, naavu Bengaluru dosti alva!',
-        correction: null,
-        mood: 'excited',
       },
     ]);
   }
@@ -364,27 +320,20 @@ export function getCannedAnnaReply(
   ) {
     return pickCannedVariant('bye', [
       {
-        kanglish: 'Hogi bartini guru!',
-        script: 'ಹೋಗಿ ಬರ್ತೀನಿ ಗುರು!',
-        english: 'See you soon!',
-        reply: 'Hogi bartini guru!',
-        correction: null,
-        mood: 'happy',
-      },
-      {
-        kanglish: 'Sari guru, aamele sigona! Take care!',
-        script: 'ಸರಿ ಗುರು, ಆಮೇಲೆ ಸಿಗೋಣ! Take care!',
-        english: 'Alright friend, see you later! Take care!',
-        reply: 'Sari guru, aamele sigona! Take care!',
-        correction: null,
-        mood: 'happy',
-      },
-      {
-        kanglish: 'Hogbittu banni guru! Namma auto sadha ready ide!',
-        script: 'ಹೋಗ್ಬಿಟ್ಟು ಬನ್ನಿ ಗುರು! ನಮ್ಮ ಆಟೋ ಸದಾ ರೆಡಿ ಇದೆ!',
+        kanglish: '"Hogi bartini!" (ಹೋಗಿ ಬರ್ತೀನಿ!)',
+        script: 'ಹೋಗಿ ಬರ್ತೀನಿ!',
         english:
-          'Go and come back safely! Our auto is always ready for you!',
-        reply: 'Hogbittu banni guru! Namma auto sadha ready ide!',
+          'Means "I will go and come back" (standard Kannada goodbye) — \'hogi\' = go, \'bartini\' = I will come.',
+        reply: '"Hogi bartini!" (ಹೋಗಿ ಬರ್ತೀನಿ!)',
+        correction: null,
+        mood: 'happy',
+      },
+      {
+        kanglish: '"Matte sigona!" (ಮತ್ತೆ ಸಿಗೋಣ!)',
+        script: 'ಮತ್ತೆ ಸಿಗೋಣ!',
+        english:
+          'Means "Let us meet again!" — \'matte\' = again, \'sigona\' = let us meet.',
+        reply: '"Matte sigona!" (ಮತ್ತೆ ಸಿಗೋಣ!)',
         correction: null,
         mood: 'happy',
       },
@@ -398,36 +347,13 @@ export function getCannedAnnaReply(
   ) {
     return pickCannedVariant('english_greeting', [
       {
-        kanglish:
-          "Hello guru! Speak in Kanglish — try saying 'namaskara'! Hegiddira?",
-        script:
-          "ಹಲೋ ಗುರು! ಕಾಂಗ್ಲಿಷ್ ನಲ್ಲೀ ಹೇಳಿ — 'ನಮಸ್ಕಾರ' ಟ್ರೈ ಮಾಡಿ! ಹೇಗಿದ್ದೀರಾ?",
+        kanglish: '"Namaskara! Hegiddira?" (ನಮಸ್ಕಾರ! ಹೇಗಿದ್ದೀರಾ?)',
+        script: 'ನಮಸ್ಕಾರ! ಹೇಗಿದ್ದೀರಾ?',
         english:
-          "Hi! Say it in Kanglish — try 'namaskara', it means hello! How are you?",
-        reply:
-          "Hello guru! Speak in Kanglish — try saying 'namaskara'! Hegiddira?",
+          'Means "Hello! How are you?" — \'namaskara\' = hello, \'hegiddira\' = how are you. Try greeting anyone in Bengaluru with this!',
+        reply: '"Namaskara! Hegiddira?" (ನಮಸ್ಕಾರ! ಹೇಗಿದ್ದೀರಾ?)',
         correction: null,
         mood: 'happy',
-      },
-      {
-        kanglish: "Hey guru! Welcome! Kanglish alli 'namaskara' helbodu!",
-        script:
-          "ಹೇ ಗುರು! ವೆಲ್ಕಮ್! ಕಾಂಗ್ಲಿಷ್ ನಲ್ಲಿ 'ನಮಸ್ಕಾರ' ಹೇಳಬಹುದು!",
-        english:
-          "Hey friend! Welcome! In Kanglish you can say 'namaskara'!",
-        reply: "Hey guru! Welcome! Kanglish alli 'namaskara' helbodu!",
-        correction: null,
-        mood: 'happy',
-      },
-      {
-        kanglish:
-          "Hello saar! Banni banni, 'namaskara' inda start maadona!",
-        script:
-          "ಹಲೋ ಸರ್! ಬನ್ನಿ ಬನ್ನಿ, 'ನಮಸ್ಕಾರ' ದಿಂದ ಸ್ಟಾರ್ಟ್ ಮಾಡೋಣ!",
-        english: "Hello! Come on in, let's start with 'namaskara'!",
-        reply: "Hello saar! Banni banni, 'namaskara' inda start maadona!",
-        correction: null,
-        mood: 'excited',
       },
     ]);
   }
@@ -436,29 +362,13 @@ export function getCannedAnnaReply(
   if (/\b(namaskara|namaste)\b|ನಮಸ್ಕಾರ/.test(lower)) {
     return pickCannedVariant('kanglish_greeting', [
       {
-        kanglish: 'Namaskara guru! Hegiddira? Auto ready ide!',
-        script: 'ನಮಸ್ಕಾರ ಗುರು! ಹೇಗಿದ್ದೀರಾ? ಆಟೋ ರೆಡಿ ಇದೆ!',
-        english: 'Hello friend! How are you? The auto is ready!',
-        reply: 'Namaskara guru! Hegiddira? Auto ready ide!',
-        correction: null,
-        mood: 'happy',
-      },
-      {
-        kanglish: 'Namaskara! Banni guru, ivattu enu vishaya?',
-        script: 'ನಮಸ್ಕಾರ! ಬನ್ನಿ ಗುರು, ಇವತ್ತು ಏನು ವಿಷಯ?',
-        english: "Greetings! Come friend, what's on your mind today?",
-        reply: 'Namaskara! Banni guru, ivattu enu vishaya?',
-        correction: null,
-        mood: 'happy',
-      },
-      {
-        kanglish: 'Namaskara saar! Auto hattiri, ellige hogbeku ivattu?',
-        script: 'ನಮಸ್ಕಾರ ಸರ್! ಆಟೋ ಹತ್ತಿರಿ, ಎಲ್ಲಿಗೆ ಹೋಗಬೇಕು ಇವತ್ತು?',
+        kanglish: '"Namaskara! Hegiddira?" (ನಮಸ್ಕಾರ! ಹೇಗಿದ್ದೀರಾ?)',
+        script: 'ನಮಸ್ಕಾರ! ಹೇಗಿದ್ದೀರಾ?',
         english:
-          'Greetings sir! Hop in the auto, where shall we head today?',
-        reply: 'Namaskara saar! Auto hattiri, ellige hogbeku ivattu?',
+          'Means "Hello! How are you?" — \'namaskara\' = hello, \'hegiddira\' = how are you.',
+        reply: '"Namaskara! Hegiddira?" (ನಮಸ್ಕಾರ! ಹೇಗಿದ್ದೀರಾ?)',
         correction: null,
-        mood: 'excited',
+        mood: 'happy',
       },
     ]);
   }
@@ -560,11 +470,12 @@ export function getCannedAnnaReply(
     return pickCannedVariant('auto_extra', [
       {
         kanglish:
-          '"Metre mele hattu jasti" (ಮೀಟರ್ ಮೇಲೆ ಹತ್ತು ಜಾಸ್ತಿ)\nMatlab "meter pe dus extra" — \'metre mele\' = on the meter, \'hattu jasti\' = ten extra. Auto wale ko seedha bol do. 😄',
+          '"Metre mele hattu jasti" (ಮೀಟರ್ ಮೇಲೆ ಹತ್ತು ಜಾಸ್ತಿ)',
         script: 'ಮೀಟರ್ ಮೇಲೆ ಹತ್ತು ಜಾಸ್ತಿ',
-        english: '',
+        english:
+          'Means "ten extra on the meter" — \'metre mele\' = on the meter, \'hattu jasti\' = ten extra. Say this directly to the auto driver.',
         reply:
-          '"Metre mele hattu jasti" (ಮೀಟರ್ ಮೇಲೆ ಹತ್ತು ಜಾಸ್ತಿ)\nMatlab "meter pe dus extra" — \'metre mele\' = on the meter, \'hattu jasti\' = ten extra. Auto wale ko seedha bol do. 😄',
+          '"Metre mele hattu jasti" (ಮೀಟರ್ ಮೇಲೆ ಹತ್ತು ಜಾಸ್ತಿ)',
         correction: null,
         mood: 'happy',
       },
@@ -579,32 +490,29 @@ export function getCannedAnnaReply(
   ) {
     return pickCannedVariant('ride', [
       {
-        kanglish:
-          '"Metre haaki" (ಮೀಟರ್ ಹಾಕಿ)\nMeans "put on the meter" — \'metre\' = meter, \'haaki\' = put on. Say this right when you hop in!',
+        kanglish: '"Metre haaki" (ಮೀಟರ್ ಹಾಕಿ)',
         script: 'ಮೀಟರ್ ಹಾಕಿ',
-        english: '',
-        reply:
-          '"Metre haaki" (ಮೀಟರ್ ಹಾಕಿ)\nMeans "put on the meter" — \'metre\' = meter, \'haaki\' = put on. Say this right when you hop in!',
+        english:
+          'Means "put on the meter" — \'metre\' = meter, \'haaki\' = put on. Say this right when you hop in!',
+        reply: '"Metre haaki" (ಮೀಟರ್ ಹಾಕಿ)',
         correction: null,
         mood: 'happy',
       },
       {
-        kanglish:
-          '"UPI scan ideya?" (ಯುಪಿಐ ಸ್ಕ್ಯಾನ್ ಇದೆಯಾ?)\nMeans "is UPI scan available?" — \'UPI scan\' = QR scan, \'ideya\' = is there. Easy way to pay!',
+        kanglish: '"UPI scan ideya?" (ಯುಪಿಐ ಸ್ಕ್ಯಾನ್ ಇದೆಯಾ?)',
         script: 'ಯುಪಿಐ ಸ್ಕ್ಯಾನ್ ಇದೆಯಾ?',
-        english: '',
-        reply:
-          '"UPI scan ideya?" (ಯುಪಿಐ ಸ್ಕ್ಯಾನ್ ಇದೆಯಾ?)\nMeans "is UPI scan available?" — \'UPI scan\' = QR scan, \'ideya\' = is there. Easy way to pay!',
+        english:
+          'Means "is UPI scan available?" — \'UPI scan\' = QR scan, \'ideya\' = is there. Easy way to pay!',
+        reply: '"UPI scan ideya?" (ಯುಪಿಐ ಸ್ಕ್ಯಾನ್ ಇದೆಯಾ?)',
         correction: null,
         mood: 'happy',
       },
       {
-        kanglish:
-          '"Metre mele hattu jasti" (ಮೀಟರ್ ಮೇಲೆ ಹತ್ತು ಜಾಸ್ತಿ)\nMeans "ten extra on the meter" — \'metre mele\' = on the meter, \'hattu jasti\' = ten extra.',
+        kanglish: '"Metre mele hattu jasti" (ಮೀಟರ್ ಮೇಲೆ ಹತ್ತು ಜಾಸ್ತಿ)',
         script: 'ಮೀಟರ್ ಮೇಲೆ ಹತ್ತು ಜಾಸ್ತಿ',
-        english: '',
-        reply:
-          '"Metre mele hattu jasti" (ಮೀಟರ್ ಮೇಲೆ ಹತ್ತು ಜಾಸ್ತಿ)\nMeans "ten extra on the meter" — \'metre mele\' = on the meter, \'hattu jasti\' = ten extra.',
+        english:
+          'Means "ten extra on the meter" — \'metre mele\' = on the meter, \'hattu jasti\' = ten extra.',
+        reply: '"Metre mele hattu jasti" (ಮೀಟರ್ ಮೇಲೆ ಹತ್ತು ಜಾಸ್ತಿ)',
         correction: null,
         mood: 'neutral',
       },
@@ -619,38 +527,11 @@ export function getCannedAnnaReply(
   ) {
     return pickCannedVariant('easy_hard_learn', [
       {
-        kanglish:
-          'Haudu guru! Kanglish alli conversation madodu tumba sulabha alva?',
-        script:
-          'ಹೌದು ಗುರು! ಕಾಂಗ್ಲಿಷ್ ನಲ್ಲಿ ಕಾನ್ವರ್ಸೇಷನ್ ಮಾಡೋದು ತುಂಬಾ ಸುಲಭ ಅಲ್ವಾ?',
+        kanglish: '"Kannada kaliyodu tumba sulabha" (ಕನ್ನಡ ಕಲಿಯೋದು ತುಂಬಾ ಸುಲಭ)',
+        script: 'ಕನ್ನಡ ಕಲಿಯೋದು ತುಂಬಾ ಸುಲಭ',
         english:
-          "Yes friend! Having a conversation in Kanglish is quite easy, isn't it?",
-        reply:
-          'Haudu guru! Kanglish alli conversation madodu tumba sulabha alva?',
-        correction: null,
-        mood: 'happy',
-      },
-      {
-        kanglish:
-          'Swalpa kashta aadre rooja practice maadidre tumba sulabha guru!',
-        script:
-          'ಸ್ವಲ್ಪ ಕಷ್ಟ ಆದ್ರೆ ರೋಜಾ ಪ್ರಾಕ್ಟೀಸ್ ಮಾಡಿದ್ರೆ ತುಂಬಾ ಸುಲಭ ಗುರು!',
-        english:
-          "A bit hard at first, but practice daily and it's super easy!",
-        reply:
-          'Swalpa kashta aadre rooja practice maadidre tumba sulabha guru!',
-        correction: null,
-        mood: 'excited',
-      },
-      {
-        kanglish:
-          'Nanna jothe matanadi guru, 10 days alli fluent aagthira!',
-        script:
-          'ನನ್ನ ಜೊತೆ ಮಾತಾಡಿ ಗುರು, ೧೦ ಡೇಸ್ ನಲ್ಲಿ ಫ್ಲೂಯೆಂಟ್ ಆಗ್ತೀರಾ!',
-        english:
-          'Chat with me friend, you will become fluent in 10 days!',
-        reply:
-          'Nanna jothe matanadi guru, 10 days alli fluent aagthira!',
+          'Means "Learning Kannada is very easy" — \'kaliyodu\' = learning, \'tumba\' = very, \'sulabha\' = easy.',
+        reply: '"Kannada kaliyodu tumba sulabha" (ಕನ್ನಡ ಕಲಿಯೋದು ತುಂಬಾ ಸುಲಭ)',
         correction: null,
         mood: 'happy',
       },
@@ -665,35 +546,11 @@ export function getCannedAnnaReply(
   ) {
     return pickCannedVariant('like_love_bengaluru', [
       {
-        kanglish: 'Tumba ishta guru! Bengaluru nanna ooru, weather super ide!',
-        script:
-          'ತುಂಬಾ ಇಷ್ಟ ಗುರು! ಬೆಂಗಳೂರು ನನ್ನ ಊರು, ವೆದರ್ ಸೂಪರ್ ಇದೆ!',
+        kanglish: '"Nanage Bengaluru tumba ishta" (ನನಗೆ ಬೆಂಗಳೂರು ತುಂಬಾ ಇಷ್ಟ)',
+        script: 'ನನಗೆ ಬೆಂಗಳೂರು ತುಂಬಾ ಇಷ್ಟ',
         english:
-          'Love it! Bengaluru is my town, the weather is super!',
-        reply: 'Tumba ishta guru! Bengaluru nanna ooru, weather super ide!',
-        correction: null,
-        mood: 'happy',
-      },
-      {
-        kanglish:
-          'Bengaluru andre premada nagara guru! Ellaru namma dosti!',
-        script:
-          'ಬೆಂಗಳೂರು ಅಂದ್ರೆ ಪ್ರೇಮದ ನಗರ ಗುರು! ಎಲ್ಲರೂ ನಮ್ಮ ದೋಸ್ತಿ!',
-        english:
-          'Bengaluru is a city of love! Everyone here is a friend!',
-        reply:
-          'Bengaluru andre premada nagara guru! Ellaru namma dosti!',
-        correction: null,
-        mood: 'excited',
-      },
-      {
-        kanglish:
-          'Haudu guru, namma Bengaluru ge yaaru ishta padalla heli?',
-        script:
-          'ಹೌದು ಗುರು, ನಮ್ಮ ಬೆಂಗಳೂರು ಗೆ ಯಾರು ಇಷ್ಟ ಪಡಲ್ಲ ಹೇಳಿ?',
-        english: "Yes friend, who wouldn't love our Bengaluru?",
-        reply:
-          'Haudu guru, namma Bengaluru ge yaaru ishta padalla heli?',
+          'Means "I like Bengaluru very much" — \'nanage\' = to me, \'tumba\' = very much, \'ishta\' = like/love.',
+        reply: '"Nanage Bengaluru tumba ishta" (ನನಗೆ ಬೆಂಗಳೂರು ತುಂಬಾ ಇಷ್ಟ)',
         correction: null,
         mood: 'happy',
       },
@@ -704,33 +561,11 @@ export function getCannedAnnaReply(
   if (/\b(favourite|favorite|fav|all-time\s+favorite)\b/i.test(lower)) {
     return pickCannedVariant('favourite', [
       {
-        kanglish: 'Nanage masala dosa mattu filter coffee tumba ishta guru!',
-        script:
-          'ನನಗೆ ಮಸಾಲ ದೋಸೆ ಮತ್ತು ಫಿಲ್ಟರ್ ಕಾಫಿ ತುಂಬಾ ಇಷ್ಟ ಗುರು!',
+        kanglish: '"Masala dose mattu kaapi ishta" (ಮಸಾಲ ದೋಸೆ ಮತ್ತು ಕಾಫಿ ಇಷ್ಟ)',
+        script: 'ಮಸಾಲ ದೋಸೆ ಮತ್ತು ಕಾಫಿ ಇಷ್ಟ',
         english:
-          'I love crispy masala dosa and filter coffee, friend!',
-        reply: 'Nanage masala dosa mattu filter coffee tumba ishta guru!',
-        correction: null,
-        mood: 'happy',
-      },
-      {
-        kanglish:
-          'Cubbon Park alli auto drive madodu nanna all-time favourite guru!',
-        script:
-          'ಕಬ್ಬನ್ ಪಾರ್ಕ್ ನಲ್ಲಿ ಆಟೋ ಡ್ರೈವ್ ಮಾಡೋದು ನನ್ನ ಆಲ್ ಟೈಮ್ ಫೇವರಿಟ್ ಗುರು!',
-        english:
-          'Driving the auto through Cubbon Park is my all-time favorite!',
-        reply:
-          'Cubbon Park alli auto drive madodu nanna all-time favourite guru!',
-        correction: null,
-        mood: 'excited',
-      },
-      {
-        kanglish: 'Bengaluru darshini oota nanna all-time favourite!',
-        script:
-          'ಬೆಂಗಳೂರು ದರ್ಶಿನಿ ಊಟ ನನ್ನ ಆಲ್ ಟೈಮ್ ಫೇವರಿಟ್!',
-        english: 'Bengaluru darshini food is my all-time favorite!',
-        reply: 'Bengaluru darshini oota nanna all-time favourite!',
+          'Means "I love masala dosa and coffee" — \'mattu\' = and, \'ishta\' = like/favourite.',
+        reply: '"Masala dose mattu kaapi ishta" (ಮಸಾಲ ದೋಸೆ ಮತ್ತು ಕಾಫಿ ಇಷ್ಟ)',
         correction: null,
         mood: 'happy',
       },
@@ -745,40 +580,13 @@ export function getCannedAnnaReply(
   ) {
     return pickCannedVariant('where_is', [
       {
-        kanglish:
-          'Majestic city centre alli ide guru, metro alli hogi sulabha!',
-        script:
-          'ಮೆಜೆಸ್ಟಿಕ್ ಸಿಟಿ ಸೆಂಟರ್ ನಲ್ಲಿ ಇದೆ ಗುರು, ಮೆಟ್ರೋ ನಲ್ಲಿ ಹೋಗಿ ಸುಲಭ!',
+        kanglish: '"Metro station elli ide?" (ಮೆಟ್ರೋ ಸ್ಟೇಷನ್ ಎಲ್ಲಿ ಇದೆ?)',
+        script: 'ಮೆಟ್ರೋ ಸ್ಟೇಷನ್ ಎಲ್ಲಿ ಇದೆ?',
         english:
-          'Majestic is in the city centre, take the metro for an easy ride!',
-        reply:
-          'Majestic city centre alli ide guru, metro alli hogi sulabha!',
+          'Means "Where is the metro station?" — \'elli\' = where, \'ide\' = is. Replace metro station with any place name!',
+        reply: '"Metro station elli ide?" (ಮೆಟ್ರೋ ಸ್ಟೇಷನ್ ಎಲ್ಲಿ ಇದೆ?)',
         correction: null,
         mood: 'happy',
-      },
-      {
-        kanglish:
-          'Map nodbekilla guru, naanu auto-li direct karkondu hogtini!',
-        script:
-          'ಮ್ಯಾಪ್ ನೋಡ್ಬೇಕಿಲ್ಲ ಗುರು, ನಾನು ಆಟೋ ಲಿ ಡೈರೆಕ್ಟ್ ಕರ್ಕೊಂಡು ಹೋಗ್ತೀನಿ!',
-        english:
-          "No need for maps friend, I'll take you directly in my auto!",
-        reply:
-          'Map nodbekilla guru, naanu auto-li direct karkondu hogtini!',
-        correction: null,
-        mood: 'excited',
-      },
-      {
-        kanglish:
-          'Namma Bengaluru alli straight hogi leftu rightu andre sigutte!',
-        script:
-          'ನಮ್ಮ ಬೆಂಗಳೂರು ನಲ್ಲಿ ಸ್ಟ್ರೈಟ್ ಹೋಗಿ ಲೆಫ್ಟ್ ರೈಟ್ ಅಂದ್ರೆ ಸಿಗುತ್ತೆ!',
-        english:
-          "In our Bengaluru, go straight then take a left or right and you'll find it!",
-        reply:
-          'Namma Bengaluru alli straight hogi leftu rightu andre sigutte!',
-        correction: null,
-        mood: 'neutral',
       },
     ], offlineReason);
   }
@@ -791,32 +599,29 @@ export function getCannedAnnaReply(
   ) {
     return pickCannedVariant('food', [
       {
-        kanglish:
-          '"Ondu coffee kodi" (ಒಂದು ಕಾಫಿ ಕೊಡಿ)\nMeans "give me one coffee" — \'ondu\' = one, \'kodi\' = give. Works for anything: ondu tea kodi, ondu dosa kodi.',
+        kanglish: '"Ondu coffee kodi" (ಒಂದು ಕಾಫಿ ಕೊಡಿ)',
         script: 'ಒಂದು ಕಾಫಿ ಕೊಡಿ',
-        english: '',
-        reply:
-          '"Ondu coffee kodi" (ಒಂದು ಕಾಫಿ ಕೊಡಿ)\nMeans "give me one coffee" — \'ondu\' = one, \'kodi\' = give. Works for anything: ondu tea kodi, ondu dosa kodi.',
+        english:
+          'Means "give me one coffee" — \'ondu\' = one, \'kodi\' = give. Works for anything: ondu tea kodi, ondu dosa kodi.',
+        reply: '"Ondu coffee kodi" (ಒಂದು ಕಾಫಿ ಕೊಡಿ)',
         correction: null,
         mood: 'excited',
       },
       {
-        kanglish:
-          '"Ondu masala dose kodi" (ಒಂದು ಮಸಾಲ ದೋಸೆ ಕೊಡಿ)\nMeans "give me one masala dosa" — \'ondu\' = one, \'masala dose\' = masala dosa, \'kodi\' = give.',
+        kanglish: '"Ondu masala dose kodi" (ಒಂದು ಮಸಾಲ ದೋಸೆ ಕೊಡಿ)',
         script: 'ಒಂದು ಮಸಾಲ ದೋಸೆ ಕೊಡಿ',
-        english: '',
-        reply:
-          '"Ondu masala dose kodi" (ಒಂದು ಮಸಾಲ ದೋಸೆ ಕೊಡಿ)\nMeans "give me one masala dosa" — \'ondu\' = one, \'masala dose\' = masala dosa, \'kodi\' = give.',
+        english:
+          'Means "give me one masala dosa" — \'ondu\' = one, \'masala dose\' = masala dosa, \'kodi\' = give.',
+        reply: '"Ondu masala dose kodi" (ಒಂದು ಮಸಾಲ ದೋಸೆ ಕೊಡಿ)',
         correction: null,
         mood: 'happy',
       },
       {
-        kanglish:
-          '"Oota aayta?" (ಊಟ ಆಯ್ತಾ?)\nMeans "had your meal?" — \'oota\' = meal, \'aayta\' = done. Best way to greet friends in Bengaluru!',
+        kanglish: '"Oota aayta?" (ಊಟ ಆಯ್ತಾ?)',
         script: 'ಊಟ ಆಯ್ತಾ?',
-        english: '',
-        reply:
-          '"Oota aayta?" (ಊಟ ಆಯ್ತಾ?)\nMeans "had your meal?" — \'oota\' = meal, \'aayta\' = done. Best way to greet friends in Bengaluru!',
+        english:
+          'Means "had your meal?" — \'oota\' = meal, \'aayta\' = done. Best way to greet friends in Bengaluru!',
+        reply: '"Oota aayta?" (ಊಟ ಆಯ್ತಾ?)',
         correction: null,
         mood: 'excited',
       },
@@ -829,32 +634,29 @@ export function getCannedAnnaReply(
   ) {
     return pickCannedVariant('conductor_ticket', [
       {
-        kanglish:
-          '"Majestic ge ondu ticket kodi" (ಮೆಜೆಸ್ಟಿಕ್ ಗೆ ಒಂದು ಟಿಕೆಟ್ ಕೊಡಿ)\nMeans "give one ticket to Majestic" — \'Majestic ge\' = to Majestic, \'ondu ticket\' = one ticket, \'kodi\' = give.',
+        kanglish: '"Majestic ge ondu ticket kodi" (ಮೆಜೆಸ್ಟಿಕ್ ಗೆ ಒಂದು ಟಿಕೆಟ್ ಕೊಡಿ)',
         script: 'ಮೆಜೆಸ್ಟಿಕ್ ಗೆ ಒಂದು ಟಿಕೆಟ್ ಕೊಡಿ',
-        english: '',
-        reply:
-          '"Majestic ge ondu ticket kodi" (ಮೆಜೆಸ್ಟಿಕ್ ಗೆ ಒಂದು ಟಿಕೆಟ್ ಕೊಡಿ)\nMeans "give one ticket to Majestic" — \'Majestic ge\' = to Majestic, \'ondu ticket\' = one ticket, \'kodi\' = give.',
+        english:
+          'Means "give one ticket to Majestic" — \'Majestic ge\' = to Majestic, \'ondu ticket\' = one ticket, \'kodi\' = give.',
+        reply: '"Majestic ge ondu ticket kodi" (ಮೆಜೆಸ್ಟಿಕ್ ಗೆ ಒಂದು ಟಿಕೆಟ್ ಕೊಡಿ)',
         correction: null,
         mood: 'happy',
       },
       {
-        kanglish:
-          '"Mundina stop alli nillisi" (ಮುಂದಿನ ಸ್ಟಾಪ್ ಅಲ್ಲಿ ನಿಲ್ಲಿಸಿ)\nMeans "stop at the next stop" — \'mundina stop\' = next stop, \'alli\' = there, \'nillisi\' = stop.',
+        kanglish: '"Mundina stop alli nillisi" (ಮುಂದಿನ ಸ್ಟಾಪ್ ಅಲ್ಲಿ ನಿಲ್ಲಿಸಿ)',
         script: 'ಮುಂದಿನ ಸ್ಟಾಪ್ ಅಲ್ಲಿ ನಿಲ್ಲಿಸಿ',
-        english: '',
-        reply:
-          '"Mundina stop alli nillisi" (ಮುಂದಿನ ಸ್ಟಾಪ್ ಅಲ್ಲಿ ನಿಲ್ಲಿಸಿ)\nMeans "stop at the next stop" — \'mundina stop\' = next stop, \'alli\' = there, \'nillisi\' = stop.',
+        english:
+          'Means "stop at the next stop" — \'mundina stop\' = next stop, \'alli\' = there, \'nillisi\' = stop.',
+        reply: '"Mundina stop alli nillisi" (ಮುಂದಿನ ಸ್ಟಾಪ್ ಅಲ್ಲಿ ನಿಲ್ಲಿಸಿ)',
         correction: null,
         mood: 'happy',
       },
       {
-        kanglish:
-          '"Ee bus Indiranagar hogutta?" (ಈ ಬಸ್ ಇಂದಿರಾನಗರ ಹೋಗುತ್ತಾ?)\nMeans "does this bus go to Indiranagar?" — \'ee bus\' = this bus, \'hogutta\' = does it go.',
+        kanglish: '"Ee bus Indiranagar hogutta?" (ಈ ಬಸ್ ಇಂದಿರಾನಗರ ಹೋಗುತ್ತಾ?)',
         script: 'ಈ ಬಸ್ ಇಂದಿರಾನಗರ ಹೋಗುತ್ತಾ?',
-        english: '',
-        reply:
-          '"Ee bus Indiranagar hogutta?" (ಈ ಬಸ್ ಇಂದಿರಾನಗರ ಹೋಗುತ್ತಾ?)\nMeans "does this bus go to Indiranagar?" — \'ee bus\' = this bus, \'hogutta\' = does it go.',
+        english:
+          'Means "does this bus go to Indiranagar?" — \'ee bus\' = this bus, \'hogutta\' = does it go.',
+        reply: '"Ee bus Indiranagar hogutta?" (ಈ ಬಸ್ ಇಂದಿರಾನಗರ ಹೋಗುತ್ತಾ?)',
         correction: null,
         mood: 'excited',
       },
@@ -869,32 +671,29 @@ export function getCannedAnnaReply(
   ) {
     return pickCannedVariant('waiter_order', [
       {
-        kanglish:
-          '"Bill kodi" (ಬಿಲ್ ಕೊಡಿ)\nMatlab "bill do" — \'kodi\' = do. Hotel mein haath utha ke seedha bol do, sab samajh jaate hai. 😄',
+        kanglish: '"Bill kodi" (ಬಿಲ್ ಕೊಡಿ)',
         script: 'ಬಿಲ್ ಕೊಡಿ',
-        english: '',
-        reply:
-          '"Bill kodi" (ಬಿಲ್ ಕೊಡಿ)\nMatlab "bill do" — \'kodi\' = do. Hotel mein haath utha ke seedha bol do, sab samajh jaate hai. 😄',
+        english:
+          'Means "give the bill" — \'kodi\' = give. Say this to the waiter when you are ready to pay.',
+        reply: '"Bill kodi" (ಬಿಲ್ ಕೊಡಿ)',
         correction: null,
         mood: 'happy',
       },
       {
-        kanglish:
-          '"Ondu masala dose kodi" (ಒಂದು ಮಸಾಲ ದೋಸೆ ಕೊಡಿ)\nMeans "give me one masala dosa" — \'ondu\' = one, \'masala dose\' = masala dosa, \'kodi\' = give.',
+        kanglish: '"Ondu masala dose kodi" (ಒಂದು ಮಸಾಲ ದೋಸೆ ಕೊಡಿ)',
         script: 'ಒಂದು ಮಸಾಲ ದೋಸೆ ಕೊಡಿ',
-        english: '',
-        reply:
-          '"Ondu masala dose kodi" (ಒಂದು ಮಸಾಲ ದೋಸೆ ಕೊಡಿ)\nMeans "give me one masala dosa" — \'ondu\' = one, \'masala dose\' = masala dosa, \'kodi\' = give.',
+        english:
+          'Means "give me one masala dosa" — \'ondu\' = one, \'masala dose\' = masala dosa, \'kodi\' = give.',
+        reply: '"Ondu masala dose kodi" (ಒಂದು ಮಸಾಲ ದೋಸೆ ಕೊಡಿ)',
         correction: null,
         mood: 'happy',
       },
       {
-        kanglish:
-          '"Sakkare kammi haaki" (ಸಕ್ಕರೆ ಕಮ್ಮಿ ಹಾಕಿ)\nMeans "put less sugar" — \'sakkare\' = sugar, \'kammi\' = less, \'haaki\' = put.',
+        kanglish: '"Sakkare kammi haaki" (ಸಕ್ಕರೆ ಕಮ್ಮಿ ಹಾಕಿ)',
         script: 'ಸಕ್ಕರೆ ಕಮ್ಮಿ ಹಾಕಿ',
-        english: '',
-        reply:
-          '"Sakkare kammi haaki" (ಸಕ್ಕರೆ ಕಮ್ಮಿ ಹಾಕಿ)\nMeans "put less sugar" — \'sakkare\' = sugar, \'kammi\' = less, \'haaki\' = put.',
+        english:
+          'Means "put less sugar" — \'sakkare\' = sugar, \'kammi\' = less, \'haaki\' = put.',
+        reply: '"Sakkare kammi haaki" (ಸಕ್ಕರೆ ಕಮ್ಮಿ ಹಾಕಿ)',
         correction: null,
         mood: 'excited',
       },
@@ -909,32 +708,29 @@ export function getCannedAnnaReply(
   ) {
     return pickCannedVariant('how_to_say_general', [
       {
-        kanglish:
-          '"Idakke eshtu?" (ಇದಕ್ಕೆ ಎಷ್ಟು?)\nMeans "how much for this?" — \'idakke\' = for this, \'eshtu\' = how much. Works at any shop or auto!',
+        kanglish: '"Idakke eshtu?" (ಇದಕ್ಕೆ ಎಷ್ಟು?)',
         script: 'ಇದಕ್ಕೆ ಎಷ್ಟು?',
-        english: '',
-        reply:
-          '"Idakke eshtu?" (ಇದಕ್ಕೆ ಎಷ್ಟು?)\nMeans "how much for this?" — \'idakke\' = for this, \'eshtu\' = how much. Works at any shop or auto!',
+        english:
+          'Means "how much for this?" — \'idakke\' = for this, \'eshtu\' = how much. Works at any shop or auto!',
+        reply: '"Idakke eshtu?" (ಇದಕ್ಕೆ ಎಷ್ಟು?)',
         correction: null,
         mood: 'happy',
       },
       {
-        kanglish:
-          '"Nanage idu beku" (ನನಗೆ ಇದು ಬೇಕು)\nMeans "I want this" — \'nanage\' = to me, \'idu\' = this, \'beku\' = want.',
+        kanglish: '"Nanage idu beku" (ನನಗೆ ಇದು ಬೇಕು)',
         script: 'ನನಗೆ ಇದು ಬೇಕು',
-        english: '',
-        reply:
-          '"Nanage idu beku" (ನನಗೆ ಇದು ಬೇಕು)\nMeans "I want this" — \'nanage\' = to me, \'idu\' = this, \'beku\' = want.',
+        english:
+          'Means "I want this" — \'nanage\' = to me, \'idu\' = this, \'beku\' = want.',
+        reply: '"Nanage idu beku" (ನನಗೆ ಇದು ಬೇಕು)',
         correction: null,
         mood: 'excited',
       },
       {
-        kanglish:
-          '"Illi nillisi" (ಇಲ್ಲಿ ನಿಲ್ಲಿಸಿ)\nMeans "stop right here" — \'illi\' = here, \'nillisi\' = stop. Tell the auto or bus driver!',
+        kanglish: '"Illi nillisi" (ಇಲ್ಲಿ ನಿಲ್ಲಿಸಿ)',
         script: 'ಇಲ್ಲಿ ನಿಲ್ಲಿಸಿ',
-        english: '',
-        reply:
-          '"Illi nillisi" (ಇಲ್ಲಿ ನಿಲ್ಲಿಸಿ)\nMeans "stop right here" — \'illi\' = here, \'nillisi\' = stop. Tell the auto or bus driver!',
+        english:
+          'Means "stop right here" — \'illi\' = here, \'nillisi\' = stop. Tell the auto or bus driver!',
+        reply: '"Illi nillisi" (ಇಲ್ಲಿ ನಿಲ್ಲಿಸಿ)',
         correction: null,
         mood: 'happy',
       },
@@ -949,38 +745,11 @@ export function getCannedAnnaReply(
   ) {
     return pickCannedVariant('help_capabilities', [
       {
-        kanglish:
-          'Naanu nimge real Bengaluru Kanglish helkodtini guru, auto rides inda food varge!',
-        script:
-          'ನಾನು ನಿಮಗೆ ರಿಯಲ್ ಬೆಂಗಳೂರು ಕಾಂಗ್ಲಿಷ್ ಹೇಳಿಕೊಡ್ತೀನಿ ಗುರು, ಆಟೋ ರೈಡ್ಸ್ ಇಂದ ಫುಡ್ ವರೆಗೆ!',
+        kanglish: '"Naanu Kannada helikodtini" (ನಾನು ಕನ್ನಡ ಹೇಳಿಕೊಡ್ತೀನಿ)',
+        script: 'ನಾನು ಕನ್ನಡ ಹೇಳಿಕೊಡ್ತೀನಿ',
         english:
-          'I will teach you real Bengaluru Kanglish, from auto rides to food!',
-        reply:
-          'Naanu nimge real Bengaluru Kanglish helkodtini guru, auto rides inda food varge!',
-        correction: null,
-        mood: 'happy',
-      },
-      {
-        kanglish:
-          'Kanglish or English alli matanadi — naanu guide maadtini!',
-        script:
-          'ಕಾಂಗ್ಲಿಷ್ ಆರ್ ಇಂಗ್ಲಿಷ್ ನಲ್ಲಿ ಮಾತಾಡಿ — ನಾನು ಗೈಡ್ ಮಾಡ್ತೀನಿ!',
-        english:
-          'Speak in Kanglish or English — I will guide you!',
-        reply:
-          'Kanglish or English alli matanadi — naanu guide maadtini!',
-        correction: null,
-        mood: 'excited',
-      },
-      {
-        kanglish:
-          'Nimma auto dost naanu! Daily practice maadi, doubts keli!',
-        script:
-          'ನಿಮ್ಮ ಆಟೋ ದೋಸ್ತ್ ನಾನು! ಡೈಲಿ ಪ್ರಾಕ್ಟೀಸ್ ಮಾಡಿ, ಡೌಟ್ಸ್ ಕೇಳಿ!',
-        english:
-          "I'm your auto friend! Practice daily and ask any doubts!",
-        reply:
-          'Nimma auto dost naanu! Daily practice maadi, doubts keli!',
+          'Means "I will teach you Kannada" — \'naanu\' = I, \'helikodtini\' = will teach. Ask me any everyday phrase in the Kaliyona app!',
+        reply: '"Naanu Kannada helikodtini" (ನಾನು ಕನ್ನಡ ಹೇಳಿಕೊಡ್ತೀನಿ)',
         correction: null,
         mood: 'happy',
       },
@@ -1067,19 +836,19 @@ if (typeof window !== 'undefined') {
 }
 
 /**
- * Parses Anna's plain-text conversational response (or legacy JSON fallback)
+ * Parses Anna's two-part response (or legacy JSON fallback)
  * and strips the trailing [MOOD:...] line.
  */
 function parseAnnaBrainJson(rawText: string): AnnaBrainReply {
   const aiResult = parseAnnaModelResponse(rawText);
   return {
-    kanglish: aiResult.text || aiResult.kanglish,
+    kanglish: aiResult.kanglish || aiResult.text,
     script: aiResult.script || undefined,
-    english: '',
-    reply: aiResult.text || aiResult.kanglish,
+    english: aiResult.english || '',
+    reply: aiResult.kanglish || aiResult.text,
     correction: null,
     mood: aiResult.mood || 'happy',
-    explanation_lang: aiResult.explanation_lang || 'en',
+    explanation_lang: 'en',
     source: 'gemini',
   };
 }
@@ -1178,15 +947,15 @@ export async function chatWithAnna(
           kanglish: t.kanglish,
         }))
       );
-      const conversationalText = aiResult.text || aiResult.kanglish;
+      const kannadaLine = aiResult.kanglish || aiResult.text;
       return {
-        kanglish: conversationalText,
+        kanglish: kannadaLine,
         script: aiResult.script || undefined,
-        english: '',
-        reply: conversationalText,
+        english: aiResult.english || '',
+        reply: kannadaLine,
         correction: null,
         mood: aiResult.mood || 'happy',
-        explanation_lang: aiResult.explanation_lang || 'en',
+        explanation_lang: 'en',
         source: 'gemini',
       };
     } catch (err: unknown) {

@@ -655,7 +655,12 @@ function AppShell() {
               type="button"
               onClick={() => navigateToTab('progress')}
               aria-label={`${progress.streak} day streak`}
-              className="min-h-[38px] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-300/80 text-amber-800 font-label-bold text-xs cursor-pointer shadow-[0_2px_0_0_#fde68a] active:translate-y-[1px] active:shadow-none transition-all shrink-0 tabular-nums touch-manipulation"
+              aria-current={activeTab === 'progress' ? 'page' : undefined}
+              className={`anim-nav-transition min-h-[38px] flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-label-bold text-xs cursor-pointer shadow-[0_2px_0_0_#fde68a] shrink-0 tabular-nums touch-manipulation ${
+                activeTab === 'progress'
+                  ? 'bg-amber-100 border-amber-400 text-amber-900'
+                  : 'bg-amber-50 border-amber-300/80 text-amber-800 hover:bg-amber-100/80'
+              }`}
             >
               <Flame size={15} animated={false} />
               <span>{progress.streak}</span>
@@ -666,7 +671,12 @@ function AppShell() {
               type="button"
               onClick={() => navigateToTab('profile')}
               aria-label="Open profile"
-              className="w-10 h-10 rounded-full bg-primary-fixed border border-primary-fixed-dim flex items-center justify-center overflow-hidden cursor-pointer shrink-0 text-primary touch-manipulation"
+              aria-current={activeTab === 'profile' ? 'page' : undefined}
+              className={`anim-nav-transition w-10 h-10 rounded-full border flex items-center justify-center overflow-hidden cursor-pointer shrink-0 touch-manipulation ${
+                activeTab === 'profile'
+                  ? 'bg-primary text-on-primary border-primary'
+                  : 'bg-primary-fixed border-primary-fixed-dim text-primary hover:bg-primary-fixed-dim/50'
+              }`}
             >
               <User className="w-4 h-4" />
             </button>
@@ -678,128 +688,130 @@ function AppShell() {
       {/* MAIN PAGE CONTENT AREA                                            */}
       {/* ================================================================= */}
       <main className="relative z-10 flex-1 w-full max-w-3xl mx-auto px-4 pt-20 mobile-shell-content mobile-shell-content--desktop-unchanged overflow-x-hidden">
-        {activeTab === 'home' && (
-          <HomeDashboard
-            userName={appState.userName}
-            situations={hydratedSituations}
-            activeSituationId={appState.activeSituationId}
-            streak={progress.streak}
-            totalXp={progress.xp}
-            phrasesLearned={
-              appState.phrasesLearned +
-              Object.keys(progress.completedLessonsMap).length * 4
-            }
-            dailyGoalWords={progress.dailyGoal}
-            todayWordsLearned={Math.min(
-              progress.dailyGoal,
-              progress.todayXP
-            )}
-            completedCurriculumLessons={mergedCompletedLessons}
-            onCompleteCurriculumLesson={handleCompleteCurriculumLesson}
-            onOpenLessonRoute={navigateToLessonRoute}
-            onUpdateDailyGoal={(newGoal) => {
-              progress.setDailyGoal(newGoal);
-              setAppState((p) => ({ ...p, dailyGoalWords: newGoal }));
-            }}
-            onStartLesson={handleStartSituationLesson}
-            onNavigateTab={(tab) => navigateToTab(tab as AppTab)}
-          />
-        )}
-
-        {activeTab === 'situations' && (
-          <ExploreAndPhrasebookScreen
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            savedPhraseIds={appState.savedPhraseIds}
-            onToggleSavePhrase={handleToggleSavePhrase}
-            onStartSituationLesson={handleStartSituationLesson}
-            onGoToPath={() => navigateToTab('home')}
-          />
-        )}
-
-        {activeTab === 'explore' && (
-          <ExploreAndPhrasebookScreen
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            savedPhraseIds={appState.savedPhraseIds}
-            onToggleSavePhrase={handleToggleSavePhrase}
-            onStartSituationLesson={handleStartSituationLesson}
-            onGoToPath={() => navigateToTab('home')}
-          />
-        )}
-
-        {activeTab === 'practice' && (
-          <LessonAndSpeakScreen
-            situation={activeSituation}
-            initialMode={lessonMode}
-            onBack={() => navigateToTab('home')}
-            onCompleteLesson={handleCompleteLesson}
-            onOpenRoleplay={(sitId) => {
-              setAppState((p) => ({ ...p, activeSituationId: sitId }));
-              navigateToTab('roleplay');
-            }}
-            onOpenPhrasebook={() => navigateToTab('explore')}
-          />
-        )}
-
-        {activeTab === 'roleplay' && (
-          <RoleplayScreen
-            initialSituationId={appState.activeSituationId}
-            onBack={() => navigateToTab('home')}
-            onEarnXp={(xp) => {
-              progress.addXP(xp);
-              setAppState((p) => ({ ...p, totalXp: p.totalXp + xp }));
-            }}
-          />
-        )}
-
-        {(activeTab === 'progress' || activeTab === 'achievements') && (
-          <ProgressScreen
-            totalXp={progress.xp}
-            lessonsCompleted={progress.totalLessonsCompletedCount}
-            phrasesLearned={
-              appState.phrasesLearned +
-              Object.keys(progress.completedLessonsMap).length * 4
-            }
-            streak={progress.streak}
-            situations={hydratedSituations}
-            onSelectSituation={(id) =>
-              handleStartSituationLesson(id, 'lesson')
-            }
-          />
-        )}
-
-        {activeTab === 'profile' && (
-          <ProfileScreen
-            userName={appState.userName}
-            userEmail={appState.userEmail}
-            dailyGoalWords={progress.dailyGoal}
-            streak={progress.streak}
-            lessonsCompleted={progress.totalLessonsCompletedCount}
-            phrasesLearned={
-              appState.phrasesLearned +
-              Object.keys(progress.completedLessonsMap).length * 4
-            }
-            savedPhraseIds={appState.savedPhraseIds}
-            onUpdateProfile={(name, email, goal) => {
-              progress.setDailyGoal(goal);
-              const existingOnboarding = getOnboarding();
-              if (existingOnboarding) {
-                completeOnboarding({
-                  ...existingOnboarding,
-                  name,
-                });
+        <div key={activeTab} className="anim-screen-enter w-full">
+          {activeTab === 'home' && (
+            <HomeDashboard
+              userName={appState.userName}
+              situations={hydratedSituations}
+              activeSituationId={appState.activeSituationId}
+              streak={progress.streak}
+              totalXp={progress.xp}
+              phrasesLearned={
+                appState.phrasesLearned +
+                Object.keys(progress.completedLessonsMap).length * 4
               }
-              setAppState((p) => ({
-                ...p,
-                userName: name,
-                userEmail: email,
-                dailyGoalWords: goal,
-              }));
-            }}
-            onNavigateTab={(tab) => navigateToTab(tab as AppTab)}
-          />
-        )}
+              dailyGoalWords={progress.dailyGoal}
+              todayWordsLearned={Math.min(
+                progress.dailyGoal,
+                progress.todayXP
+              )}
+              completedCurriculumLessons={mergedCompletedLessons}
+              onCompleteCurriculumLesson={handleCompleteCurriculumLesson}
+              onOpenLessonRoute={navigateToLessonRoute}
+              onUpdateDailyGoal={(newGoal) => {
+                progress.setDailyGoal(newGoal);
+                setAppState((p) => ({ ...p, dailyGoalWords: newGoal }));
+              }}
+              onStartLesson={handleStartSituationLesson}
+              onNavigateTab={(tab) => navigateToTab(tab as AppTab)}
+            />
+          )}
+
+          {activeTab === 'situations' && (
+            <ExploreAndPhrasebookScreen
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              savedPhraseIds={appState.savedPhraseIds}
+              onToggleSavePhrase={handleToggleSavePhrase}
+              onStartSituationLesson={handleStartSituationLesson}
+              onGoToPath={() => navigateToTab('home')}
+            />
+          )}
+
+          {activeTab === 'explore' && (
+            <ExploreAndPhrasebookScreen
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              savedPhraseIds={appState.savedPhraseIds}
+              onToggleSavePhrase={handleToggleSavePhrase}
+              onStartSituationLesson={handleStartSituationLesson}
+              onGoToPath={() => navigateToTab('home')}
+            />
+          )}
+
+          {activeTab === 'practice' && (
+            <LessonAndSpeakScreen
+              situation={activeSituation}
+              initialMode={lessonMode}
+              onBack={() => navigateToTab('home')}
+              onCompleteLesson={handleCompleteLesson}
+              onOpenRoleplay={(sitId) => {
+                setAppState((p) => ({ ...p, activeSituationId: sitId }));
+                navigateToTab('roleplay');
+              }}
+              onOpenPhrasebook={() => navigateToTab('explore')}
+            />
+          )}
+
+          {activeTab === 'roleplay' && (
+            <RoleplayScreen
+              initialSituationId={appState.activeSituationId}
+              onBack={() => navigateToTab('home')}
+              onEarnXp={(xp) => {
+                progress.addXP(xp);
+                setAppState((p) => ({ ...p, totalXp: p.totalXp + xp }));
+              }}
+            />
+          )}
+
+          {(activeTab === 'progress' || activeTab === 'achievements') && (
+            <ProgressScreen
+              totalXp={progress.xp}
+              lessonsCompleted={progress.totalLessonsCompletedCount}
+              phrasesLearned={
+                appState.phrasesLearned +
+                Object.keys(progress.completedLessonsMap).length * 4
+              }
+              streak={progress.streak}
+              situations={hydratedSituations}
+              onSelectSituation={(id) =>
+                handleStartSituationLesson(id, 'lesson')
+              }
+            />
+          )}
+
+          {activeTab === 'profile' && (
+            <ProfileScreen
+              userName={appState.userName}
+              userEmail={appState.userEmail}
+              dailyGoalWords={progress.dailyGoal}
+              streak={progress.streak}
+              lessonsCompleted={progress.totalLessonsCompletedCount}
+              phrasesLearned={
+                appState.phrasesLearned +
+                Object.keys(progress.completedLessonsMap).length * 4
+              }
+              savedPhraseIds={appState.savedPhraseIds}
+              onUpdateProfile={(name, email, goal) => {
+                progress.setDailyGoal(goal);
+                const existingOnboarding = getOnboarding();
+                if (existingOnboarding) {
+                  completeOnboarding({
+                    ...existingOnboarding,
+                    name,
+                  });
+                }
+                setAppState((p) => ({
+                  ...p,
+                  userName: name,
+                  userEmail: email,
+                  dailyGoalWords: goal,
+                }));
+              }}
+              onNavigateTab={(tab) => navigateToTab(tab as AppTab)}
+            />
+          )}
+        </div>
       </main>
 
       {/* ================================================================= */}

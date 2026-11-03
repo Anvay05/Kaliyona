@@ -1104,3 +1104,198 @@ html, body, #root {
 .bottom-toast-offset {
   bottom: calc(var(--bottom-nav-h) + 12px);
 }
+
+/* ========================================================================= */
+/* MICRO-ANIMATIONS & VISUAL POLISH (GPU transform + opacity ONLY)           */
+/* ========================================================================= */
+:root {
+  --anim-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --anim-ease-soft: ease-out;
+  --anim-fast: 150ms;
+  --anim-base: 220ms;
+  --anim-smooth: 260ms;
+  --anim-ring: 340ms;
+}
+
+@keyframes microScreenEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes microMsgAnnaEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(-10px, 4px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes microMsgUserEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(10px, 4px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes microStaggerUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes microCardFadeUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes microModalBackdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes microModalPanel {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* 1. Screen / page transitions (240ms fade + 10px upward slide) */
+.anim-screen-enter {
+  animation: microScreenEnter 240ms var(--anim-ease-out) both;
+}
+
+/* 2. Chat message entrance (220ms, no bounce) */
+.anim-msg-anna {
+  animation: microMsgAnnaEnter var(--anim-base) var(--anim-ease-out) both;
+}
+
+.anim-msg-user {
+  animation: microMsgUserEnter var(--anim-base) var(--anim-ease-out) both;
+}
+
+/* 3. Phrasebook & list item stagger entrance (200ms + capped stagger delay) */
+.anim-stagger-item {
+  animation: microStaggerUp 200ms var(--anim-ease-out) both;
+  animation-delay: var(--stagger-delay, 0ms);
+}
+
+/* 4. Progress section cards fade up on open */
+.anim-card-fade-up {
+  animation: microCardFadeUp var(--anim-smooth) var(--anim-ease-out) both;
+  animation-delay: var(--card-delay, 0ms);
+}
+
+/* One-time progress ring stroke transition */
+.anim-ring-stroke {
+  transition: stroke-dashoffset var(--anim-ring) var(--anim-ease-out);
+}
+
+/* 5. Subtle button press (scale 0.97) & 150ms hover transitions */
+button:not(:disabled),
+[role="button"]:not(:disabled) {
+  transition:
+    transform var(--anim-fast) var(--anim-ease-out),
+    background-color var(--anim-fast) var(--anim-ease-soft),
+    border-color var(--anim-fast) var(--anim-ease-soft),
+    color var(--anim-fast) var(--anim-ease-soft),
+    opacity var(--anim-fast) var(--anim-ease-soft),
+    box-shadow var(--anim-fast) var(--anim-ease-soft);
+}
+
+button:not(:disabled):active,
+[role="button"]:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+.btn-primary:active:not(:disabled),
+.btn-ghost:active:not(:disabled),
+.btn-success:active:not(:disabled) {
+  transform: scale(0.97) translateY(1px);
+}
+
+/* 6. Modals & settings panel entrance */
+.anim-modal-backdrop {
+  animation: microModalBackdrop 180ms var(--anim-ease-soft) both;
+}
+
+.anim-modal-panel {
+  animation: microModalPanel 240ms var(--anim-ease-out) both;
+}
+
+.anim-panel-slide-up {
+  animation: microModalPanel 220ms var(--anim-ease-out) both;
+}
+
+/* 7. Header & nav smooth color/state transitions (zero layout movement) */
+.anim-nav-transition {
+  transition:
+    color var(--anim-fast) var(--anim-ease-soft),
+    background-color var(--anim-fast) var(--anim-ease-soft),
+    border-color var(--anim-fast) var(--anim-ease-soft),
+    opacity var(--anim-fast) var(--anim-ease-soft),
+    transform var(--anim-fast) var(--anim-ease-out);
+}
+
+/* Strict accessibility: disable all micro-animations when reduced-motion is active */
+@media (prefers-reduced-motion: reduce) {
+  .anim-screen-enter,
+  .anim-msg-anna,
+  .anim-msg-user,
+  .anim-stagger-item,
+  .anim-card-fade-up,
+  .anim-modal-backdrop,
+  .anim-modal-panel,
+  .anim-panel-slide-up {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .anim-ring-stroke,
+  .anim-nav-transition,
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    transition: none !important;
+  }
+
+  button:not(:disabled):active,
+  [role="button"]:not(:disabled):active,
+  .btn-primary:active:not(:disabled),
+  .btn-ghost:active:not(:disabled),
+  .btn-success:active:not(:disabled) {
+    transform: none !important;
+  }
+}

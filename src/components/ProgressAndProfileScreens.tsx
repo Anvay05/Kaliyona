@@ -354,6 +354,10 @@ function formatDateKey(date: Date): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+// Ensure circular progress rings animate their stroke on first view ONCE only — not on every re-render
+let hasAnimatedProgressRingOnce = false;
+let hasAnimatedProfileRingOnce = false;
+
 interface ProgressScreenProps {
   totalXp: number;
   lessonsCompleted: number;
@@ -555,6 +559,26 @@ export const ProgressScreen: React.FC<ProgressScreenProps> = () => {
   const ringDashOffset =
     ringCircumference - (crownedPct / 100) * ringCircumference;
 
+  const [progressRingReady, setProgressRingReady] = useState<boolean>(
+    () => hasAnimatedProgressRingOnce
+  );
+
+  useEffect(() => {
+    if (hasAnimatedProgressRingOnce) {
+      setProgressRingReady(true);
+      return;
+    }
+    hasAnimatedProgressRingOnce = true;
+    const rafId = requestAnimationFrame(() => {
+      setProgressRingReady(true);
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
+  const displayedRingDashOffset = progressRingReady
+    ? ringDashOffset
+    : ringCircumference;
+
   const unlockedCount = achievements.length;
 
   return (
@@ -626,18 +650,24 @@ export const ProgressScreen: React.FC<ProgressScreenProps> = () => {
         </div>
 
         {/* HERO STREAK CARD (--progress-gradient) + 3-TILE STREAK STATS ROW */}
-        <div className="space-y-3.5">
+        <div
+          style={{ '--card-delay': '0ms' } as React.CSSProperties}
+          className="anim-card-fade-up space-y-3.5"
+        >
           <StreakCard variant="progress" />
           <StreakStatTiles />
         </div>
 
         {/* 7-DAY STREAK & XP VISUALIZER (Recharts) — VIOLET FITNESS PALETTE */}
         <div
-          style={{
-            backgroundColor: 'var(--progress-card)',
-            boxShadow: 'var(--progress-card-shadow)',
-          }}
-          className="rounded-[22px] p-4 sm:p-6 space-y-4"
+          style={
+            {
+              backgroundColor: 'var(--progress-card)',
+              boxShadow: 'var(--progress-card-shadow)',
+              '--card-delay': '45ms',
+            } as React.CSSProperties
+          }
+          className="anim-card-fade-up rounded-[22px] p-4 sm:p-6 space-y-4"
         >
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -1062,11 +1092,14 @@ export const ProgressScreen: React.FC<ProgressScreenProps> = () => {
 
         {/* 7-DAY WORDS LEARNED BAR CHART + COMPACT CONTRIBUTION GRID */}
         <div
-          style={{
-            backgroundColor: 'var(--progress-card)',
-            boxShadow: 'var(--progress-card-shadow)',
-          }}
-          className="rounded-[22px] p-4 sm:p-6 space-y-4"
+          style={
+            {
+              backgroundColor: 'var(--progress-card)',
+              boxShadow: 'var(--progress-card-shadow)',
+              '--card-delay': '90ms',
+            } as React.CSSProperties
+          }
+          className="anim-card-fade-up rounded-[22px] p-4 sm:p-6 space-y-4"
         >
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5">
             <div className="flex items-center gap-3">
@@ -1384,7 +1417,10 @@ export const ProgressScreen: React.FC<ProgressScreenProps> = () => {
         </div>
 
         {/* Top Grid: XP Area Chart + Units Crowned Circular Progress Ring */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div
+          style={{ '--card-delay': '135ms' } as React.CSSProperties}
+          className="anim-card-fade-up grid grid-cols-1 lg:grid-cols-12 gap-5"
+        >
           <div
             style={{
               backgroundColor: 'var(--progress-card)',
@@ -1547,8 +1583,8 @@ export const ProgressScreen: React.FC<ProgressScreenProps> = () => {
                     strokeWidth="12"
                     strokeLinecap="round"
                     strokeDasharray={ringCircumference}
-                    strokeDashoffset={ringDashOffset}
-                    className="transition-all duration-500 ease-out"
+                    strokeDashoffset={displayedRingDashOffset}
+                    className="anim-ring-stroke"
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-3">
@@ -1603,7 +1639,10 @@ export const ProgressScreen: React.FC<ProgressScreenProps> = () => {
         </div>
 
         {/* STAT TRIO ROW: Lessons completed · Words learned · Streak */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <div
+          style={{ '--card-delay': '160ms' } as React.CSSProperties}
+          className="anim-card-fade-up grid grid-cols-1 sm:grid-cols-3 gap-3.5"
+        >
           <div
             style={{
               backgroundColor: 'var(--progress-card)',
@@ -1677,11 +1716,14 @@ export const ProgressScreen: React.FC<ProgressScreenProps> = () => {
         {/* CHRONOLOGICAL 'RECENTLY LEARNED' TIMELINE (LAST 5 PRACTICED PHRASES + AUDIO PLAY) */}
         <div
           data-recently-learned-timeline="true"
-          style={{
-            backgroundColor: 'var(--progress-card)',
-            boxShadow: 'var(--progress-card-shadow)',
-          }}
-          className="rounded-[22px] p-5 sm:p-6 space-y-5"
+          style={
+            {
+              backgroundColor: 'var(--progress-card)',
+              boxShadow: 'var(--progress-card-shadow)',
+              '--card-delay': '180ms',
+            } as React.CSSProperties
+          }
+          className="anim-card-fade-up rounded-[22px] p-5 sm:p-6 space-y-5"
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -1731,7 +1773,12 @@ export const ProgressScreen: React.FC<ProgressScreenProps> = () => {
                 return (
                   <li
                     key={phrase.key}
-                    className="relative flex items-stretch gap-3.5 sm:gap-4"
+                    style={
+                      {
+                        '--stagger-delay': `${Math.min(idx * 45, 180)}ms`,
+                      } as React.CSSProperties
+                    }
+                    className="anim-stagger-item relative flex items-stretch gap-3.5 sm:gap-4"
                   >
                     {/* Vertical timeline track + chronological node */}
                     <div className="relative flex flex-col items-center shrink-0 pt-1">
@@ -1855,11 +1902,14 @@ export const ProgressScreen: React.FC<ProgressScreenProps> = () => {
 
         {/* 16 ACHIEVEMENTS & STREET BADGES GRID — UNACHIEVED CARDS ARE BLACK & WHITE + LOCKED */}
         <div
-          style={{
-            backgroundColor: 'var(--progress-card)',
-            boxShadow: 'var(--progress-card-shadow)',
-          }}
-          className="rounded-[22px] p-5 sm:p-6 space-y-4"
+          style={
+            {
+              backgroundColor: 'var(--progress-card)',
+              boxShadow: 'var(--progress-card-shadow)',
+              '--card-delay': '200ms',
+            } as React.CSSProperties
+          }
+          className="anim-card-fade-up rounded-[22px] p-5 sm:p-6 space-y-4"
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
@@ -2106,6 +2156,26 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   const ringDashOffset =
     ringCircumference - (dailyGoalPct / 100) * ringCircumference;
 
+  const [profileRingReady, setProfileRingReady] = useState<boolean>(
+    () => hasAnimatedProfileRingOnce
+  );
+
+  useEffect(() => {
+    if (hasAnimatedProfileRingOnce) {
+      setProfileRingReady(true);
+      return;
+    }
+    hasAnimatedProfileRingOnce = true;
+    const rafId = requestAnimationFrame(() => {
+      setProfileRingReady(true);
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
+  const displayedProfileRingOffset = profileRingReady
+    ? ringDashOffset
+    : ringCircumference;
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     playTactileTone('success');
@@ -2196,9 +2266,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       </div>
 
       {profileSubTab === 'notes' ? (
-        <NotesDeckSection />
+        <div key="notes" className="anim-screen-enter">
+          <NotesDeckSection />
+        </div>
       ) : (
-        <>
+        <div key="overview" className="anim-screen-enter space-y-6">
           {/* User Profile Card */}
           <div className="glass-strong relative overflow-hidden p-6 sm:p-8">
             <ProfileCardBackdropDoodle variant="hero" />
@@ -2235,7 +2307,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               {editing && (
                 <form
                   onSubmit={handleSave}
-                  className="p-4 rounded-2xl bg-white/85 border border-indigo-200/80 space-y-4 shadow-xs"
+                  className="anim-panel-slide-up p-4 rounded-2xl bg-white/85 border border-indigo-200/80 space-y-4 shadow-xs"
                 >
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
@@ -2372,7 +2444,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     strokeWidth="6"
                     strokeLinecap="round"
                     strokeDasharray={ringCircumference}
-                    strokeDashoffset={ringDashOffset}
+                    strokeDashoffset={displayedProfileRingOffset}
+                    className="anim-ring-stroke"
                   />
                 </svg>
                 <span className="absolute font-mono-accent font-bold text-xs text-[var(--ink)]">
@@ -2634,7 +2707,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               VERSION 1.0.0 · BENGALURU EDITION
             </p>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

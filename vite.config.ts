@@ -1,15 +1,26 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig} from 'vite';
+import {defineConfig, loadEnv} from 'vite';
 
-export default defineConfig(() => {
+export default defineConfig(({mode}) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  const resolvedGeminiKey =
+    env.VITE_GEMINI_API_KEY ||
+    process.env.VITE_GEMINI_API_KEY ||
+    '';
+  const resolvedAnnaKey =
+    env.VITE_ANNA_DEFAULT_KEY ||
+    env.ANNA_DEFAULT_KEY ||
+    process.env.VITE_ANNA_DEFAULT_KEY ||
+    process.env.ANNA_DEFAULT_KEY ||
+    '';
+
   return {
     plugins: [react(), tailwindcss()],
     define: {
-      'process.env.VITE_ANNA_DEFAULT_KEY': JSON.stringify(
-        process.env.VITE_ANNA_DEFAULT_KEY || process.env.ANNA_DEFAULT_KEY || ''
-      ),
+      'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(resolvedGeminiKey),
+      'process.env.VITE_ANNA_DEFAULT_KEY': JSON.stringify(resolvedAnnaKey),
     },
     resolve: {
       alias: {

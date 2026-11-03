@@ -116,11 +116,11 @@ const ANNA_INTRO_DATE_KEY = 'kanglish_anna_intro_date';
 
 const INITIAL_ANNA_GREETING: AnnaChatTurn = {
   role: 'anna',
-  kanglish: 'Namaskara guru! Naanu Anna — nimma Bengaluru buddy!',
-  script: 'ನಮಸ್ಕಾರ ಗುರು! ನಾನು ಅಣ್ಣ — ನಿಮ್ಮ ಬೆಂಗಳೂರು ಬಡ್ಡಿ!',
+  kanglish: '"Namaskara! Naanu Anna" (ನಮಸ್ಕಾರ! ನಾನು ಅಣ್ಣ)',
+  script: 'ನಮಸ್ಕಾರ! ನಾನು ಅಣ್ಣ',
   english:
-    "Hi! I'm Anna — your Bengaluru buddy. I'm here to chat and teach you everyday Kanglish. Say anything — English or Kanglish!",
-  text: 'Namaskara guru! Naanu Anna — nimma Bengaluru buddy!',
+    'Means "Hello! I am Anna" — I am your Kannada tutor in the Kaliyona app. Ask me how to say anything in Kannada!',
+  text: '"Namaskara! Naanu Anna" (ನಮಸ್ಕಾರ! ನಾನು ಅಣ್ಣ)',
   correction: null,
   mood: 'happy',
   source: 'canned',
@@ -130,10 +130,11 @@ const INITIAL_ANNA_GREETING: AnnaChatTurn = {
 const WELCOME_BACK_GREETINGS: AnnaChatTurn[] = [
   {
     role: 'anna',
-    kanglish: 'Matte bandri guru!',
-    script: 'ಮತ್ತೆ ಬಂದ್ರಿ ಗುರು!',
-    english: "Back again! What's on your mind?",
-    text: 'Matte bandri guru!',
+    kanglish: '"Matte bandri!" (ಮತ್ತೆ ಬಂದ್ರಿ!)',
+    script: 'ಮತ್ತೆ ಬಂದ್ರಿ!',
+    english:
+      'Means "Welcome back!" — I am Anna, your Kannada tutor in the Kaliyona app. What phrase would you like to learn today?',
+    text: '"Matte bandri!" (ಮತ್ತೆ ಬಂದ್ರಿ!)',
     correction: null,
     mood: 'happy',
     source: 'canned',
@@ -141,10 +142,11 @@ const WELCOME_BACK_GREETINGS: AnnaChatTurn[] = [
   },
   {
     role: 'anna',
-    kanglish: 'Enu visit guru?',
-    script: 'ಏನು ವಿಸಿಟ್ ಗುರು?',
-    english: 'What brings you back?',
-    text: 'Enu visit guru?',
+    kanglish: '"Enu kaliyona ivattu?" (ಏನು ಕಲಿಯೋಣ ಇವತ್ತು?)',
+    script: 'ಏನು ಕಲಿಯೋಣ ಇವತ್ತು?',
+    english:
+      'Means "What shall we learn today?" — \'enu\' = what, \'kaliyona\' = let\'s learn, \'ivattu\' = today.',
+    text: '"Enu kaliyona ivattu?" (ಏನು ಕಲಿಯೋಣ ಇವತ್ತು?)',
     correction: null,
     mood: 'happy',
     source: 'canned',
@@ -152,10 +154,11 @@ const WELCOME_BACK_GREETINGS: AnnaChatTurn[] = [
   },
   {
     role: 'anna',
-    kanglish: 'Ready aa practice-ge?',
-    script: 'ರೆಡಿ ಆ ಪ್ರಾಕ್ಟೀಸ್ ಗೆ?',
-    english: 'Ready to practice?',
-    text: 'Ready aa practice-ge?',
+    kanglish: '"Kannada abhyasa maadona" (ಕನ್ನಡ ಅಭ್ಯಾಸ ಮಾಡೋಣ)',
+    script: 'ಕನ್ನಡ ಅಭ್ಯಾಸ ಮಾಡೋಣ',
+    english:
+      'Means "Let\'s practice Kannada" — \'abhyasa\' = practice, \'maadona\' = let\'s do.',
+    text: '"Kannada abhyasa maadona" (ಕನ್ನಡ ಅಭ್ಯಾಸ ಮಾಡೋಣ)',
     correction: null,
     mood: 'happy',
     source: 'canned',
@@ -163,10 +166,11 @@ const WELCOME_BACK_GREETINGS: AnnaChatTurn[] = [
   },
   {
     role: 'anna',
-    kanglish: 'Banni banni!',
+    kanglish: '"Banni banni!" (ಬನ್ನಿ ಬನ್ನಿ!)',
     script: 'ಬನ್ನಿ ಬನ್ನಿ!',
-    english: "Welcome back, let's chat!",
-    text: 'Banni banni!',
+    english:
+      'Means "Welcome, come in!" — \'banni\' = come (polite). Ready for your next Kannada lesson in Kaliyona!',
+    text: '"Banni banni!" (ಬನ್ನಿ ಬನ್ನಿ!)',
     correction: null,
     mood: 'happy',
     source: 'canned',
@@ -468,7 +472,7 @@ export const TalkToAnnaModal: React.FC<TalkToAnnaModalProps> = ({
       {
         id: 'anna',
         name: 'Anna',
-        role: 'Your Kannada teacher',
+        role: 'Kannada Tutor · Kaliyona',
         color: '#6C5CE7',
       },
       ...SCENARIOS.map((s) => ({
@@ -1302,7 +1306,7 @@ export const TalkToAnnaModal: React.FC<TalkToAnnaModalProps> = ({
                 </span>
                 {orbState !== 'speaking' && orbState !== 'thinking' && (
                   <span className="hidden min-[400px]:inline text-on-surface-variant/80 font-medium">
-                    · Bengaluru Buddy
+                    · Kannada Tutor · Kaliyona
                   </span>
                 )}
               </p>
@@ -1693,47 +1697,59 @@ export const TalkToAnnaModal: React.FC<TalkToAnnaModalProps> = ({
                             Press Enter to save · Esc to cancel
                           </div>
                         </div>
+                      ) : isAnna ? (
+                        (() => {
+                          const rawKanglish = stripMoodTag(
+                            turn.kanglish || turn.text || ''
+                          ).cleanText;
+                          const lines = rawKanglish
+                            .split(/\r?\n/)
+                            .map((l) => l.trim())
+                            .filter(Boolean);
+                          const mainRaw = lines[0] || rawKanglish;
+                          const fallbackLine2 =
+                            lines.length > 1 ? lines.slice(1).join(' ') : '';
+                          const extraExp =
+                            stripMoodTag(turn.english || '').cleanText ||
+                            fallbackLine2;
+
+                          const cleanMainPhrase = mainRaw.replace(
+                            /^["'“”‘’]+|["'“”‘’]+$/g,
+                            ''
+                          );
+                          const formattedKannadaLine =
+                            turn.script && !mainRaw.includes(turn.script)
+                              ? `"${cleanMainPhrase}" (${turn.script})`
+                              : mainRaw;
+
+                          const showEnglishExplanation =
+                            Boolean(extraExp) &&
+                            extraExp.toLowerCase() !==
+                              mainRaw.toLowerCase() &&
+                            extraExp.toLowerCase() !==
+                              formattedKannadaLine.toLowerCase();
+
+                          return (
+                            <div className="w-full space-y-1.5 text-left pt-0.5">
+                              <p className="w-full whitespace-pre-wrap break-words text-left text-[15px] sm:text-base font-bold text-on-surface leading-snug font-sans">
+                                {formattedKannadaLine}
+                                {turn.edited && (
+                                  <span className="text-[10px] text-on-surface-variant/70 italic font-normal ml-1.5 inline-block">
+                                    (edited)
+                                  </span>
+                                )}
+                              </p>
+                              {showEnglishExplanation && (
+                                <p className="w-full whitespace-pre-wrap break-words text-left text-sm sm:text-[14.5px] font-normal text-on-surface-variant leading-relaxed font-sans border-t border-indigo-100/70 pt-1.5">
+                                  {extraExp}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })()
                       ) : (
-                        <p
-                          className={`w-full whitespace-pre-wrap break-words text-left text-[15px] sm:text-base leading-relaxed font-sans ${
-                            isAnna
-                              ? 'font-medium text-on-surface'
-                              : 'font-medium text-white'
-                          }`}
-                        >
-                          {isAnna
-                            ? (() => {
-                                const mainRaw = stripMoodTag(
-                                  turn.kanglish || turn.text || ''
-                                ).cleanText;
-                                const extraExp = stripMoodTag(
-                                  turn.english || ''
-                                ).cleanText;
-                                if (
-                                  extraExp &&
-                                  !mainRaw
-                                    .toLowerCase()
-                                    .includes(extraExp.toLowerCase()) &&
-                                  extraExp.toLowerCase() !== mainRaw.toLowerCase()
-                                ) {
-                                  const cleanMainPhrase = mainRaw.replace(
-                                    /^["'“”‘’]+|["'“”‘’]+$/g,
-                                    ''
-                                  );
-                                  const formattedLine1 =
-                                    turn.script && !mainRaw.includes(turn.script)
-                                      ? `"${cleanMainPhrase}" (${turn.script})`
-                                      : mainRaw;
-                                  return `${formattedLine1}\n${extraExp}`;
-                                }
-                                return mainRaw;
-                              })()
-                            : renderUserBubbleContent(turn.text)}
-                          {isAnna && turn.edited && (
-                            <span className="text-[10px] text-on-surface-variant/70 italic font-normal ml-1.5 inline-block">
-                              (edited)
-                            </span>
-                          )}
+                        <p className="w-full whitespace-pre-wrap break-words text-left text-[15px] sm:text-base leading-relaxed font-sans font-medium text-white">
+                          {renderUserBubbleContent(turn.text)}
                         </p>
                       )}
 

@@ -152,7 +152,7 @@ export function AiSettingsCard() {
         )}
       </div>
 
-      <div className="glass-strong relative overflow-hidden rounded-2xl p-4 sm:p-5 border border-[var(--line)] bg-white/70 shadow-xs space-y-4">
+      <div className="anim-panel-slide-up glass-strong relative overflow-hidden rounded-2xl p-4 sm:p-5 border border-[var(--line)] bg-white/70 shadow-xs space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
@@ -240,14 +240,14 @@ export function AiSettingsCard() {
 
         {/* Test connection output inline banner */}
         {testState.loading && (
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs">
+          <div className="anim-panel-slide-up flex items-center gap-2 p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs">
             <Loader2 size={14} className="animate-spin text-indigo-600 shrink-0" />
             <span>Pinging Anna on free/kimi-k3...</span>
           </div>
         )}
 
         {!testState.loading && testState.success && (
-          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 space-y-1 animate-in fade-in">
+          <div className="anim-panel-slide-up p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 space-y-1">
             <div className="font-semibold flex items-center gap-1.5 text-emerald-700">
               <CheckCircle2 size={14} />
               Connected ✓ — Anna is online
@@ -261,7 +261,7 @@ export function AiSettingsCard() {
         )}
 
         {!testState.loading && testState.error && (
-          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 space-y-1 animate-in fade-in">
+          <div className="anim-panel-slide-up p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 space-y-1">
             <div className="font-semibold flex items-center gap-1.5 text-rose-700">
               <AlertCircle size={14} className="shrink-0" />
               Connection Failed

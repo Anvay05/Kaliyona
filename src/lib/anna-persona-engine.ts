@@ -1431,16 +1431,16 @@ export function replyTo(
   if (intent === 'NAME') {
     if (persona) {
       return {
-        script: `ನಾನು ${persona.title}! ${persona.tagline}. ನಿಮಗೆ ಸಹಾಯ ಮಾಡ್ತೀನಿ.`,
-        kanglish: `Naanu ${persona.title}! ${persona.tagline}. Nimage sahaaya maadtini.${englishNudge}`,
-        english: `I am the ${persona.title}! ${persona.tagline}. I am here to help you.`,
+        script: `ನಾನು ${persona.title}! ನಿಮಗೆ ಸಹಾಯ ಮಾಡ್ತೀನಿ.`,
+        kanglish: `"Naanu ${persona.title}!" (ನಾನು ${persona.title}!)`,
+        english: `Means "I am the ${persona.title}!" — ${persona.tagline}. I am here to help you practice Kannada.`,
         mood: 'happy',
       };
     }
     return {
-      script: 'ನನ್ನ ಹೆಸರು ಅಣ್ಣ! ನಿಮ್ಮ ಬೆಂಗಳೂರು ಲೋಕಲ್ ಫ್ರೆಂಡ್.',
-      kanglish: `Nanna hesaru Anna! Nimma Bengaluru local friend.${englishNudge}`,
-      english: 'My name is Anna! Your Bengaluru local friend.',
+      script: 'ನನ್ನ ಹೆಸರು ಅಣ್ಣ! ನಾನು ನಿಮ್ಮ ಕನ್ನಡ ಟ್ಯೂಟರ್.',
+      kanglish: `"Nanna hesaru Anna!" (ನನ್ನ ಹೆಸರು ಅಣ್ಣ!)`,
+      english: 'Means "My name is Anna!" — I am your Kannada tutor in the Kaliyona app.',
       mood: 'happy',
     };
   }
@@ -1505,15 +1505,15 @@ export function buildDynamicEnglishReply(
       const w = matchedWords[0];
       return {
         script: `${w.script} ಕೊಡಿ`,
-        kanglish: `"${w.kanglish} kodi" (${w.script} ಕೊಡಿ)\nMeans "give me ${w.en}" — '${w.kanglish}' = ${w.en}, 'kodi' = give.`,
-        english: '',
+        kanglish: `"${w.kanglish} kodi" (${w.script} ಕೊಡಿ)`,
+        english: `Means "give me ${w.en}" — '${w.kanglish}' = ${w.en}, 'kodi' = give.`,
         mood: 'happy',
       };
     }
     return {
       script: 'ನಾನು ಮಾಡಬಹುದಾ?',
-      kanglish: `"Naanu maadabahuda?" (ನಾನು ಮಾಡಬಹುದಾ?)\nMeans "can I do this?" — 'naanu' = I, 'maadabahuda' = can do.`,
-      english: '',
+      kanglish: `"Naanu maadabahuda?" (ನಾನು ಮಾಡಬಹುದಾ?)`,
+      english: `Means "can I do this?" — 'naanu' = I, 'maadabahuda' = can do.`,
       mood: 'happy',
     };
   }
@@ -1524,15 +1524,15 @@ export function buildDynamicEnglishReply(
       const w = matchedWords[0];
       return {
         script: `${w.script} ಇದೆಯಾ?`,
-        kanglish: `"${w.kanglish} ideya?" (${w.script} ಇದೆಯಾ?)\nMeans "do you have ${w.en}?" — '${w.kanglish}' = ${w.en}, 'ideya' = is there.`,
-        english: '',
+        kanglish: `"${w.kanglish} ideya?" (${w.script} ಇದೆಯಾ?)`,
+        english: `Means "do you have ${w.en}?" — '${w.kanglish}' = ${w.en}, 'ideya' = is there.`,
         mood: 'excited',
       };
     }
     return {
       script: 'ಇದು ಇದೆಯಾ?',
-      kanglish: `"Idu ideya?" (ಇದು ಇದೆಯಾ?)\nMeans "is this available?" — 'idu' = this, 'ideya' = is there.`,
-      english: '',
+      kanglish: `"Idu ideya?" (ಇದು ಇದೆಯಾ?)`,
+      english: `Means "is this available?" — 'idu' = this, 'ideya' = is there.`,
       mood: 'happy',
     };
   }
@@ -1542,23 +1542,23 @@ export function buildDynamicEnglishReply(
     if (/\b(new|learning|beginner|student|from)\b/i.test(lower)) {
       return {
         script: 'ನಾನು ಇಲ್ಲಿ ಹೊಸಬ',
-        kanglish: `"Naanu illi hosaba" (ನಾನು ಇಲ್ಲಿ ಹೊಸಬ)\nMeans "I am new here" — 'naanu' = I, 'illi' = here, 'hosaba' = newcomer.`,
-        english: '',
+        kanglish: `"Naanu illi hosaba" (ನಾನು ಇಲ್ಲಿ ಹೊಸಬ)`,
+        english: `Means "I am new here" — 'naanu' = I, 'illi' = here, 'hosaba' = newcomer.`,
         mood: 'excited',
       };
     }
     if (/\b(hungry|starving|thirsty|tired)\b/i.test(lower)) {
       return {
         script: 'ನನಗೆ ಹಸಿವಾಗಿದೆ',
-        kanglish: `"Nanage hasivaagide" (ನನಗೆ ಹಸಿವಾಗಿದೆ)\nMeans "I am hungry" — 'nanage' = to me, 'hasivaagide' = feeling hungry.`,
-        english: '',
+        kanglish: `"Nanage hasivaagide" (ನನಗೆ ಹಸಿವಾಗಿದೆ)`,
+        english: `Means "I am hungry" — 'nanage' = to me, 'hasivaagide' = feeling hungry.`,
         mood: 'happy',
       };
     }
     return {
       script: 'ನಾನು ರೆಡಿ ಇದ್ದೀನಿ',
-      kanglish: `"Naanu ready iddini" (ನಾನು ರೆಡಿ ಇದ್ದೀನಿ)\nMeans "I am ready" — 'naanu' = I, 'ready iddini' = am ready.`,
-      english: '',
+      kanglish: `"Naanu ready iddini" (ನಾನು ರೆಡಿ ಇದ್ದೀನಿ)`,
+      english: `Means "I am ready" — 'naanu' = I, 'ready iddini' = am ready.`,
       mood: 'happy',
     };
   }
@@ -1568,8 +1568,8 @@ export function buildDynamicEnglishReply(
     const w1 = matchedWords[0];
     return {
       script: `ಒಂದು ${w1.script} ಕೊಡಿ`,
-      kanglish: `"Ondu ${w1.kanglish} kodi" (ಒಂದು ${w1.script} ಕೊಡಿ)\nMeans "give me one ${w1.en}" — 'ondu' = one, '${w1.kanglish}' = ${w1.en}, 'kodi' = give.`,
-      english: '',
+      kanglish: `"Ondu ${w1.kanglish} kodi" (ಒಂದು ${w1.script} ಕೊಡಿ)`,
+      english: `Means "give me one ${w1.en}" — 'ondu' = one, '${w1.kanglish}' = ${w1.en}, 'kodi' = give.`,
       mood: 'happy',
     };
   }
@@ -1578,8 +1578,8 @@ export function buildDynamicEnglishReply(
   if (/^(what|why|when|where|how|which|who)\b|\?$/i.test(lower)) {
     return {
       script: 'ಇದಕ್ಕೆ ಎಷ್ಟು?',
-      kanglish: `"Idakke eshtu?" (ಇದಕ್ಕೆ ಎಷ್ಟು?)\nMeans "how much for this?" — 'idakke' = for this, 'eshtu' = how much. Ask ${roleTitle} directly!`,
-      english: '',
+      kanglish: `"Idakke eshtu?" (ಇದಕ್ಕೆ ಎಷ್ಟು?)`,
+      english: `Means "how much for this?" — 'idakke' = for this, 'eshtu' = how much. Ask ${roleTitle} directly!`,
       mood: 'happy',
     };
   }
@@ -1587,8 +1587,8 @@ export function buildDynamicEnglishReply(
   // 6. General statement -> ONE short beginner phrase + word-by-word breakdown
   return {
     script: 'ನನಗೆ ಇದು ಬೇಕು',
-    kanglish: `"Nanage idu beku" (ನನಗೆ ಇದು ಬೇಕು)\nMeans "I want this" — 'nanage' = to me, 'idu' = this, 'beku' = want.`,
-    english: '',
+    kanglish: `"Nanage idu beku" (ನನಗೆ ಇದು ಬೇಕು)`,
+    english: `Means "I want this" — 'nanage' = to me, 'idu' = this, 'beku' = want.`,
     mood: 'happy',
   };
 }

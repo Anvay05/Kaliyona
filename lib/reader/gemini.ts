@@ -1,3 +1,4 @@
+import { GoogleGenAI, Type, ThinkingLevel } from '@google/genai';
 import type { LexiconEntry } from './lexicon';
 import { STRINGS } from '@/lib/i18n';
 
@@ -52,26 +53,77 @@ export class GeminiReaderError extends Error {
   }
 }
 
-function getConfiguredApiKey(): string {
-  const raw = import.meta.env.VITE_GEMINI_API_KEY;
-  if (typeof raw !== 'string') return '';
-  const trimmed = raw.trim();
-  if (
+function isPlaceholderKey(val?: unknown): boolean {
+  if (typeof val !== 'string') return true;
+  const trimmed = val.trim();
+  return (
     !trimmed ||
     trimmed === 'MY_GEMINI_API_KEY' ||
+    trimmed === 'YOUR_DEMO_API_KEY_HERE' ||
     trimmed === 'PASTE_KEY_HERE' ||
     trimmed === '<key>' ||
     trimmed === 'YOUR_API_KEY'
-  ) {
-    return '';
+  );
+}
+
+function getStoredGeminiKeyFromBrowser(): string {
+  if (typeof window === 'undefined' || !window.localStorage) return '';
+  try {
+    const directCandidates = [
+      window.localStorage.getItem('gemini_api_key'),
+      window.localStorage.getItem('VITE_GEMINI_API_KEY'),
+      window.localStorage.getItem('GEMINI_API_KEY'),
+    ];
+    for (const candidate of directCandidates) {
+      if (candidate && !isPlaceholderKey(candidate)) {
+        return candidate.trim();
+      }
+    }
+    // Also support a Google AI Studio key (starts with AIza) if user pasted it in Anna's Brain settings
+    const annaKey = (window.localStorage.getItem('anna_api_key') || '').trim();
+    if (annaKey.startsWith('AIza') && !isPlaceholderKey(annaKey)) {
+      return annaKey;
+    }
+  } catch {
+    // Ignore storage read errors
   }
-  return trimmed;
+  return '';
+}
+
+export function getConfiguredApiKey(): string {
+  const storedBrowserKey = getStoredGeminiKeyFromBrowser();
+  if (storedBrowserKey) return storedBrowserKey;
+
+  const metaEnv =
+    typeof import.meta !== 'undefined' && import.meta.env
+      ? (import.meta.env as Record<string, unknown>)
+      : {};
+  const procEnv =
+    typeof process !== 'undefined' && process.env
+      ? (process.env as Record<string, unknown>)
+      : {};
+
+  const candidates = [
+    metaEnv.VITE_GEMINI_API_KEY,
+    metaEnv.GEMINI_API_KEY,
+    procEnv.GEMINI_API_KEY,
+    procEnv.VITE_GEMINI_API_KEY,
+    procEnv.GOOGLE_API_KEY,
+    procEnv.API_KEY,
+  ];
+
+  for (const raw of candidates) {
+    if (typeof raw === 'string' && !isPlaceholderKey(raw)) {
+      return raw.trim();
+    }
+  }
+  return '';
 }
 
 /**
  * Instant, ping-free check whether Gemini Vision is available.
- * Returns true when online so either VITE_GEMINI_API_KEY or the server-side
- * GEMINI_API_KEY proxy can fulfill the request without false-negative key errors.
+ * Returns true when online so either VITE_GEMINI_API_KEY, process.env.GEMINI_API_KEY,
+ * or the server-side GEMINI_API_KEY proxy can fulfill the request without false-negative key errors.
  */
 export function hasGeminiApiKey(): boolean {
   if (getConfiguredApiKey().length > 0) return true;
@@ -428,11 +480,31 @@ function delayMs(ms: number, signal?: AbortSignal): Promise<void> {
   });
 }
 
+function cleanBase64Image(input: string): string {
+  const trimmed = input.trim();
+  const commaIdx = trimmed.indexOf(',');
+  if (trimmed.startsWith('data:') && commaIdx !== -1) {
+    return trimmed.slice(commaIdx + 1).trim();
+  }
+  return trimmed;
+}
+
+function getThinkingConfigForClientModel(modelName: string) {
+  if (modelName.includes('3.1-flash-lite')) {
+    return { thinkingLevel: ThinkingLevel.MINIMAL };
+  }
+  if (modelName.includes('3-flash')) {
+    return { thinkingLevel: ThinkingLevel.LOW };
+  }
+  return undefined;
+}
+
 async function performSingleGeminiFetch(
   apiKey: string,
-  base64Jpeg: string,
+  rawBase64Jpeg: string,
   outerSignal?: AbortSignal
 ): Promise<string> {
+  const base64Jpeg = cleanBase64Image(rawBase64Jpeg);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {
     controller.abort();
@@ -442,8 +514,9 @@ async function performSingleGeminiFetch(
   outerSignal?.addEventListener('abort', onOuterAbort, { once: true });
 
   try {
-    // 1. Primary path: server-side proxy (/api/reader/scan) using gemini-3.8-flash
-    //    (works with AI Studio injected GEMINI_API_KEY + .env.local VITE_GEMINI_API_KEY)
+    // 1. Primary path: server-side proxy (/api/reader/scan)
+    //    (works in AI Studio preview, Node server deployments, and Vercel serverless functions)
+    let serverMissingKey = false;
     try {
       const serverResp = await fetch('/api/reader/scan', {
         method: 'POST',
@@ -466,10 +539,17 @@ async function performSingleGeminiFetch(
         );
       }
 
+      if (serverResp.status === 503) {
+        serverMissingKey = true;
+      }
+
       if (serverResp.ok) {
-        const payload = (await serverResp.json()) as { rawText?: string };
-        if (typeof payload?.rawText === 'string') {
-          return payload.rawText;
+        const contentType = serverResp.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const payload = (await serverResp.json()) as { rawText?: string };
+          if (typeof payload?.rawText === 'string') {
+            return payload.rawText;
+          }
         }
       }
     } catch (proxyErr) {
@@ -479,120 +559,134 @@ async function performSingleGeminiFetch(
       if (proxyErr instanceof DOMException && proxyErr.name === 'AbortError') {
         throw proxyErr;
       }
-      // If proxy route is unreachable, fall through to direct REST fetch below
+      // If proxy route is unreachable (e.g. static ZIP hosting), fall through to direct SDK fallback below
     }
 
-    // 2. Direct REST fallback with gemini-3.8-flash (hedged with gemini-3.1-flash-lite)
-    if (!apiKey) {
+    // 2. Direct Client-Side @google/genai SDK fallback for static/ZIP hosting
+    const effectiveKey = apiKey || getConfiguredApiKey();
+    if (!effectiveKey) {
       throw new GeminiReaderError(
         'missing_key',
-        STRINGS.reader.offlineNotice
+        serverMissingKey
+          ? 'Gemini API key not configured. Set GEMINI_API_KEY or VITE_GEMINI_API_KEY in your environment variables (or paste a Gemini key in Settings).'
+          : STRINGS.reader.offlineNotice
       );
     }
 
-    const modelsToTry: Array<{ modelName: string; thinkingLevel: string }> = [
-      { modelName: GEMINI_VISION_MODEL, thinkingLevel: 'LOW' },
-      { modelName: 'gemini-3.1-flash-lite', thinkingLevel: 'MINIMAL' },
+    const ai = new GoogleGenAI({
+      apiKey: effectiveKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
+    });
+
+    // Multi-model fallback chain identical to server.ts so public Gemini API calls succeed outside AI Studio
+    const candidateModels = [
+      'gemini-3-flash-preview',
+      'gemini-2.5-flash',
+      'gemini-flash-latest',
+      'gemini-3.1-flash-lite-preview',
     ];
 
-    const callRestModel = async (
+    const callSdkModel = async (
       modelName: string,
-      thinkingLevel: string,
       delayOffsetMs: number
     ): Promise<string> => {
       if (delayOffsetMs > 0) {
         await delayMs(delayOffsetMs, controller.signal);
       }
+      if (controller.signal.aborted) {
+        throw new GeminiReaderError('aborted', 'Scan aborted');
+      }
 
-      const requestBody = JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                inlineData: {
-                  mimeType: 'image/jpeg',
-                  data: base64Jpeg,
+      const thinkingConfig = getThinkingConfigForClientModel(modelName);
+      try {
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: 'image/jpeg',
+                    data: base64Jpeg,
+                  },
                 },
-              },
-              {
-                text: GEMINI_READER_PROMPT,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.1,
-          responseMimeType: 'application/json',
-          thinkingConfig: {
-            thinkingLevel,
-          },
-          responseSchema: {
-            type: 'ARRAY',
-            items: {
-              type: 'OBJECT',
-              properties: {
-                kn: { type: 'STRING' },
-                translit: { type: 'STRING' },
-                en: { type: 'STRING' },
-                box: {
-                  type: 'ARRAY',
-                  items: { type: 'INTEGER' },
+                {
+                  text: GEMINI_READER_PROMPT,
                 },
+              ],
+            },
+          ],
+          config: {
+            responseMimeType: 'application/json',
+            ...(thinkingConfig ? { thinkingConfig } : {}),
+            responseSchema: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  kn: {
+                    type: Type.STRING,
+                    description: 'Exact Kannada script text as written.',
+                  },
+                  translit: {
+                    type: Type.STRING,
+                    description: 'Simple Latin/English transliteration.',
+                  },
+                  en: {
+                    type: Type.STRING,
+                    description: 'Concise English translation.',
+                  },
+                  box: {
+                    type: Type.ARRAY,
+                    items: { type: Type.INTEGER },
+                    description:
+                      'Bounding box [ymin, xmin, ymax, xmax] normalized 0 to 1000.',
+                  },
+                },
+                required: ['kn', 'translit', 'en', 'box'],
               },
-              required: ['kn', 'translit', 'en', 'box'],
             },
           },
-        },
-      });
+        });
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(
-        apiKey
-      )}`;
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: requestBody,
-        signal: controller.signal,
-      });
-
-      if (response.status === 429) {
-        throw new GeminiReaderError(
-          'rate_limit',
-          STRINGS.reader.rateLimitError
-        );
-      }
-
-      if (!response.ok) {
+        const text = (response.text || '').trim();
+        const parsedItems = parseAndValidateGeminiResponse(text);
+        if (parsedItems.length === 0) {
+          throw new Error('EMPTY_DETECTION');
+        }
+        return text;
+      } catch (sdkErr: unknown) {
+        if (sdkErr instanceof Error && sdkErr.message === 'EMPTY_DETECTION') {
+          throw sdkErr;
+        }
+        const errObj = sdkErr as { status?: number; message?: string };
+        const msg = typeof errObj?.message === 'string' ? errObj.message : '';
+        if (
+          errObj?.status === 429 ||
+          msg.includes('429') ||
+          msg.includes('RESOURCE_EXHAUSTED')
+        ) {
+          throw new GeminiReaderError(
+            'rate_limit',
+            STRINGS.reader.rateLimitError
+          );
+        }
         throw new GeminiReaderError(
           'network',
-          `Model ${modelName} returned ${response.status}`
+          msg || `Model ${modelName} failed`
         );
       }
-
-      const data = (await response.json()) as {
-        candidates?: Array<{
-          content?: {
-            parts?: Array<{
-              text?: string;
-            }>;
-          };
-        }>;
-      };
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-      const parsedItems = parseAndValidateGeminiResponse(text);
-      if (parsedItems.length === 0) {
-        throw new Error('EMPTY_DETECTION');
-      }
-      return text;
     };
 
     try {
       return await Promise.any(
-        modelsToTry.map((entry, idx) =>
-          callRestModel(entry.modelName, entry.thinkingLevel, idx * 600)
+        candidateModels.map((modelName, idx) =>
+          callSdkModel(modelName, idx * 1200)
         )
       );
     } catch (aggErr) {

@@ -792,16 +792,13 @@ export function parseTwoPartSpeechSegments(
 }
 
 /**
- * Builds ONE unified preview string when needed by legacy helpers
+ * Builds the spoken Kannada string ONLY (never includes the English explanation).
  */
 export function buildSingleAnnaSpokenText(
   input: string | SpeakAnnaInput | any
 ): string {
-  const { line1Translit, line2Explanation } = parseTwoPartSpeechSegments(input);
-  if (!line2Explanation) return line1Translit;
-  if (!line1Translit) return line2Explanation;
-  const pause = /[.!?]$/.test(line1Translit) ? '' : '.';
-  return `${line1Translit}${pause} — ${line2Explanation}`;
+  const { line1Translit, line1Script } = parseTwoPartSpeechSegments(input);
+  return line1Translit || line1Script || '';
 }
 
 let cachedSingleAnnaVoice: SpeechSynthesisVoice | null = null;
@@ -834,46 +831,12 @@ export function resolveSingleAnnaVoice(
       (v) =>
         (v.name || '').toLowerCase().includes('india') && norm(v).startsWith('en')
     ) ||
-    allVoices.find((v) => norm(v).startsWith('hi')) ||
     allVoices.find((v) => norm(v).startsWith('en')) ||
     allVoices[0] ||
     null;
 
   cachedSingleAnnaVoice = enInVoice;
   return cachedSingleAnnaVoice;
-}
-
-function resolveExplanationVoice(
-  allVoices: SpeechSynthesisVoice[],
-  lang: 'en' | 'hi' | 'kn'
-): SpeechSynthesisVoice | null {
-  if (!allVoices || allVoices.length === 0) return null;
-  const norm = (v: SpeechSynthesisVoice) =>
-    (v.lang || '').toLowerCase().replace('_', '-');
-
-  if (lang === 'kn') {
-    const knVoices = rankKannadaVoices(
-      allVoices.filter((v) => norm(v).startsWith('kn'))
-    );
-    if (knVoices.length > 0) return knVoices[0];
-  }
-
-  if (lang === 'hi') {
-    const hiVoice =
-      allVoices.find((v) => norm(v) === 'hi-in') ||
-      allVoices.find((v) => norm(v).startsWith('hi')) ||
-      null;
-    if (hiVoice) return hiVoice;
-  }
-
-  return (
-    allVoices.find((v) => norm(v) === 'en-in') ||
-    allVoices.find((v) => norm(v).startsWith('en-in')) ||
-    allVoices.find((v) => norm(v).includes('-in') && norm(v).startsWith('en')) ||
-    allVoices.find((v) => norm(v).startsWith('en')) ||
-    allVoices[0] ||
-    null
-  );
 }
 
 export async function getOrResolveSingleAnnaVoice(
@@ -982,9 +945,9 @@ async function speakSingleUtterance(
 }
 
 /**
- * Two-Part Anna Speech:
- * - Line 1 (Kannada line): spoken in the Kannada voice (kn-IN if available, reading native Kannada script or transliteration).
- * - Line 2 onwards (Explanation): spoken in the explanation voice matching the user's language (hi-IN / en-IN / kn-IN).
+ * Pure Kannada Speech:
+ * Anna ONLY speaks Line 1 (the Kannada phrase).
+ * The English explanation below the voice message is text-only and is NEVER read aloud.
  */
 export async function speakAnnaReply(
   input: string | SpeakAnnaInput | any,
@@ -992,14 +955,9 @@ export async function speakAnnaReply(
 ): Promise<void> {
   const { onStart, onBoundary, onEnd } = callbacks;
 
-  const {
-    line1Translit,
-    line1Script,
-    line2Explanation,
-    explanationLang,
-  } = parseTwoPartSpeechSegments(input);
+  const { line1Translit, line1Script } = parseTwoPartSpeechSegments(input);
 
-  if (!line1Translit && !line1Script && !line2Explanation) {
+  if (!line1Translit && !line1Script) {
     onEnd?.();
     return;
   }
@@ -1009,8 +967,8 @@ export async function speakAnnaReply(
     !('speechSynthesis' in window) ||
     typeof SpeechSynthesisUtterance === 'undefined'
   ) {
-    const totalLen = (line1Translit + line2Explanation).length;
-    const durationMs = Math.min(4500, Math.max(1400, totalLen * 55));
+    const totalLen = (line1Translit || line1Script).length;
+    const durationMs = Math.min(3500, Math.max(1200, totalLen * 65));
     onStart?.();
     await new Promise<void>((r) => window.setTimeout(r, durationMs));
     onEnd?.();
@@ -1031,7 +989,7 @@ export async function speakAnnaReply(
     if (myGeneration !== currentSpeechGeneration) return;
   }
 
-  await getOrResolveSingleAnnaVoice(synth);
+  const chosenVoice = await getOrResolveSingleAnnaVoice(synth);
   if (myGeneration !== currentSpeechGeneration) return;
 
   const allVoices = synth.getVoices() || [];
@@ -1041,52 +999,26 @@ export async function speakAnnaReply(
   const rankedKnVoices = rankKannadaVoices(
     allVoices.filter((v) => norm(v).startsWith('kn'))
   );
-  const kannadaVoice =
-    rankedKnVoices[0] || resolveExplanationVoice(allVoices, 'en');
   const hasNativeKnVoice = rankedKnVoices.length > 0;
+  const kannadaVoice = rankedKnVoices[0] || chosenVoice;
 
-  // If a real kn-IN voice is installed and Line 1 has Kannada script, speak the Kannada script for authentic pronunciation;
-  // otherwise speak the clean Kannada transliteration.
+  // Speak ONLY the Kannada line (native Kannada script if kn-IN voice is available, else clean Kannada transliteration)
   const line1SpokenText =
     hasNativeKnVoice && line1Script ? line1Script : line1Translit || line1Script;
-
-  const explanationVoice = resolveExplanationVoice(allVoices, explanationLang);
 
   onStart?.();
 
   if (line1SpokenText) {
     console.log(
-      `[Anna Voice] Line 1 (Kannada): "${line1SpokenText}" | Voice: ${
+      `[Anna Voice] Speaking Kannada ONLY: "${line1SpokenText}" | Voice: ${
         kannadaVoice?.name || 'Default'
-      } (${kannadaVoice?.lang || 'kn-IN'})`
+      } (${kannadaVoice?.lang || (hasNativeKnVoice ? 'kn-IN' : 'en-IN')})`
     );
     await speakSingleUtterance(
       synth,
       line1SpokenText,
       kannadaVoice,
       hasNativeKnVoice ? 'kn-IN' : 'en-IN',
-      myGeneration,
-      onBoundary
-    );
-  }
-
-  if (line2Explanation && myGeneration === currentSpeechGeneration) {
-    const expFallbackLang =
-      explanationLang === 'hi'
-        ? 'hi-IN'
-        : explanationLang === 'kn'
-        ? 'kn-IN'
-        : 'en-IN';
-    console.log(
-      `[Anna Voice] Line 2 (Explanation [${explanationLang}]): "${line2Explanation}" | Voice: ${
-        explanationVoice?.name || 'Default'
-      } (${explanationVoice?.lang || expFallbackLang})`
-    );
-    await speakSingleUtterance(
-      synth,
-      line2Explanation,
-      explanationVoice,
-      expFallbackLang,
       myGeneration,
       onBoundary
     );

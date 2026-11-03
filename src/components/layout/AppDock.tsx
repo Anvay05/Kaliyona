@@ -81,8 +81,8 @@ function DockIcon({
         aria-current={active ? 'page' : undefined}
         style={interactive ? { width: size, height: size } : undefined}
         className={cn(
-          'relative flex h-11 w-[54px] cursor-pointer items-center justify-center rounded-2xl touch-manipulation',
-          'transition-colors duration-150 outline-none',
+          'anim-nav-transition relative flex h-11 w-[54px] cursor-pointer items-center justify-center rounded-2xl touch-manipulation',
+          'outline-none',
           'focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40',
           interactive ? 'hover:bg-black/[0.05]' : 'active:bg-black/[0.06]',
           active ? 'text-[var(--primary)]' : 'text-neutral-400',
@@ -95,7 +95,7 @@ function DockIcon({
       </motion.button>
       <span
         className={cn(
-          'select-none text-[10px] font-medium leading-none tracking-tight transition-colors',
+          'anim-nav-transition select-none text-[10px] font-medium leading-none tracking-tight',
           active ? 'text-[var(--primary)]' : 'text-neutral-400',
         )}
       >
