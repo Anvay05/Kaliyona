@@ -15,8 +15,8 @@ export interface VoiceConfigSchema {
 
 export const VOICE_CONFIG: VoiceConfigSchema = {
   GEMINI_API_KEY: 'PASTE_KEY_HERE', // hackathon only — key is visible in browser; rotate after the event (server proxy automatically uses process.env.GEMINI_API_KEY)
-  TRANSCRIBE_MODEL: 'gemini-2.5-flash-native-audio-preview-09-2025',
-  BRAIN_MODEL: 'gemini-3-flash-preview', // high throughput, fast text responses, active quota
+  TRANSCRIBE_MODEL: 'gemini-3.5-transcribe',
+  BRAIN_MODEL: 'gemini-3.5-flash-lite', // low-latency text responses
   MOCK_MODE: false, // true = no API calls, fake transcripts + canned replies, so UI can be built/tested free
   MAX_TURNS_PER_SESSION: 12, // cost guard
   MAX_RECORD_SECONDS: 15, // push-to-talk auto-release cap

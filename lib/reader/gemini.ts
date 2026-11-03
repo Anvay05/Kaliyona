@@ -8,7 +8,7 @@ import { STRINGS } from '@/lib/i18n';
 
 const DAILY_CAP_STORAGE_KEY = 'kaliyona_reader_daily_scans_v1';
 export const DAILY_SCAN_LIMIT = 100;
-export const GEMINI_VISION_MODEL = 'gemini-3.8-flash';
+export const GEMINI_VISION_MODEL = 'gemini-3.5-flash-lite';
 const REQUEST_TIMEOUT_MS = 45_000;
 const RETRY_BACKOFF_MS = 1_200;
 const MAX_IMAGE_DIMENSION = 1152;
@@ -65,6 +65,7 @@ function isPlaceholderKey(val?: unknown): boolean {
     trimmed === 'MY_GEMINI_API_KEY' ||
     trimmed === 'YOUR_DEMO_API_KEY_HERE' ||
     trimmed === 'YOUR_KIMI_K3_API_KEY' ||
+    trimmed === 'YOUR_APINEX_API_KEY' ||
     trimmed === 'PASTE_KEY_HERE' ||
     trimmed === '<key>' ||
     trimmed === 'YOUR_API_KEY'
@@ -588,10 +589,9 @@ async function performSingleGeminiFetch(
     });
 
     const candidateModels = [
-      'gemini-3-flash-preview',
+      'gemini-3.5-flash-lite',
       'gemini-2.5-flash',
       'gemini-flash-latest',
-      'gemini-3.1-flash-lite-preview',
     ];
 
     const callSdkModel = async (
@@ -1004,7 +1004,7 @@ async function scanKannadaWithBuiltInEngine(
 let inFlightScanPromise: Promise<GeminiDetectedOverlayItem[]> | null = null;
 
 /**
- * Sends a compressed JPEG image to Gemini Vision (gemini-3.8-flash), enforces a
+ * Sends a compressed JPEG image to Gemini Vision (gemini-3.5-flash-lite), enforces a
  * 1-request-at-a-time lock, 100/day localStorage soft cap, 45s timeout, and 1 automatic retry.
  */
 export async function scanKannadaImageWithGemini(

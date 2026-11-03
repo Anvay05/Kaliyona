@@ -30,6 +30,7 @@ function isPlaceholderKey(val?: string): boolean {
     trimmed === 'MY_GEMINI_API_KEY' ||
     trimmed === 'YOUR_DEMO_API_KEY_HERE' ||
     trimmed === 'YOUR_KIMI_K3_API_KEY' ||
+    trimmed === 'YOUR_APINEX_API_KEY' ||
     trimmed === '<key>' ||
     trimmed === 'YOUR_API_KEY'
   );
@@ -37,11 +38,11 @@ function isPlaceholderKey(val?: string): boolean {
 
 function getGenAIClient(overrideKey?: string): GoogleGenAI | null {
   const candidates = [
-    overrideKey,
     process.env.GEMINI_API_KEY,
     process.env.VITE_GEMINI_API_KEY,
     process.env.GOOGLE_API_KEY,
     process.env.API_KEY,
+    overrideKey,
   ];
   const rawKey = candidates.find((k) => !isPlaceholderKey(k))?.trim() || '';
 
@@ -85,16 +86,17 @@ function getAnnaOpenAiConfig(
         'ANNA_API_KEY',
         'KIMI_API_KEY',
         'KIMI_K3_API_KEY',
+        'APINEX_API_KEY',
         'ANNA_DEFAULT_KEY',
         'VITE_ANNA_DEFAULT_KEY',
       ]),
     baseUrl:
+      firstConfiguredEnv(['ANNA_BASE_URL', 'KIMI_BASE_URL', 'APINEX_BASE_URL']) ||
       (overrideBaseUrl || '').trim() ||
-      firstConfiguredEnv(['ANNA_BASE_URL', 'KIMI_BASE_URL']) ||
       'https://api.apinex.bond/v1',
     model:
-      (overrideModel || '').trim() ||
       firstConfiguredEnv(['ANNA_MODEL', 'KIMI_MODEL']) ||
+      (overrideModel || '').trim() ||
       'free/kimi-k3',
   };
 }
@@ -199,19 +201,20 @@ async function requestAnnaOpenAiCompletion(
 }
 
 function resolveBrainModel(requestedModel?: string): string {
-  if (!requestedModel) return 'gemini-3-flash-preview';
+  if (!requestedModel) return 'gemini-3.5-flash-lite';
   const normalized = requestedModel.trim().toLowerCase();
   if (
+    normalized === 'gemini-3.5-flash-lite' ||
     normalized === 'gemini-3-flash-preview' ||
     normalized === 'gemini-3.8-flash' ||
     normalized === 'gemini-3.5-flash' ||
     normalized === 'gemini-flash' ||
     normalized === 'gemini-flash-latest'
   ) {
-    return 'gemini-3-flash-preview';
+    return 'gemini-3.5-flash-lite';
   }
   if (normalized === 'gemini-lite' || normalized === 'flash-lite' || normalized === 'gemini-3.1-flash-lite') {
-    return 'gemini-3.1-flash-lite-preview';
+    return 'gemini-3.5-flash-lite';
   }
   return requestedModel;
 }
@@ -226,6 +229,79 @@ function getThinkingConfigForModel(modelName: string) {
   return undefined;
 }
 
+function getApinexApiKey(): string {
+  return firstConfiguredEnv([
+    'APINEX_API_KEY',
+    'KIMI_API_KEY',
+    'KIMI_K3_API_KEY',
+    'ANNA_API_KEY',
+    'VITE_ANNA_DEFAULT_KEY',
+  ]);
+}
+
+async function callApinexServerVision(
+  cleanedBase64: string,
+  promptText: string
+): Promise<string | null> {
+  const apiKey = getApinexApiKey();
+  if (!apiKey) return null;
+
+  for (const model of ['free/gemini-3.8-flash', 'free/kimi-k3']) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 24_000);
+    try {
+      const response = await fetch(
+        'https://api.apinex.bond/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  { type: 'text', text: promptText },
+                  {
+                    type: 'image_url',
+                    image_url: {
+                      url: `data:image/jpeg;base64,${cleanedBase64}`,
+                    },
+                  },
+                ],
+              },
+            ],
+            temperature: 0.1,
+          }),
+          signal: controller.signal,
+        }
+      );
+      if (!response.ok) continue;
+
+      const data = (await response.json()) as {
+        choices?: Array<{ message?: { content?: unknown } }>;
+      };
+      const raw = String(data?.choices?.[0]?.message?.content || '').trim();
+      const start = raw.indexOf('[');
+      const end = raw.lastIndexOf(']');
+      if (start !== -1 && end > start) {
+        const parsed = JSON.parse(raw.slice(start, end + 1));
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return JSON.stringify(parsed);
+        }
+      }
+    } catch {
+      // Try the next Apinex vision model.
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+  return null;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function generateContentWithFallback(
   ai: GoogleGenAI,
@@ -236,17 +312,15 @@ async function generateContentWithFallback(
   const primaryModel = resolveBrainModel(params.model);
   const fallbackChain = requireNonEmptyArray
     ? [
+        'gemini-3.5-flash-lite',
+        'gemini-3.8-flash',
         'gemini-3-flash-preview',
-        'gemini-2.5-flash',
-        'gemini-flash-latest',
-        'gemini-3.1-flash-lite-preview',
       ]
     : [
         primaryModel,
+        'gemini-3.5-flash-lite',
+        'gemini-3.8-flash',
         'gemini-3-flash-preview',
-        'gemini-2.5-flash',
-        'gemini-flash-latest',
-        'gemini-3.1-flash-lite-preview',
       ].filter((m, idx, arr) => Boolean(m) && arr.indexOf(m) === idx);
 
   const callSingleModel = async (candidateModel: string, delayMs = 0) => {
@@ -346,7 +420,7 @@ async function startServer() {
   app.use(express.json({ limit: '25mb' }));
 
   // =========================================================================
-  // POST /api/reader/scan — City Reader Gemini Vision Endpoint (gemini-3.8-flash)
+  // POST /api/reader/scan — City Reader Gemini Vision Endpoint (gemini-3.5-flash-lite)
   // =========================================================================
   app.post('/api/reader/scan', async (req, res) => {
     try {
@@ -360,16 +434,31 @@ async function startServer() {
         ? imageBase64.slice(imageBase64.indexOf(',') + 1).trim()
         : imageBase64.trim();
 
-      const ai = getGenAIClient(clientApiKey);
+      const promptText =
+        typeof prompt === 'string' && prompt.trim()
+          ? prompt
+          : 'Find every distinct Kannada word, line, or short phrase in this image (including signs, bus boards, menus, banners, and news/meme captions) and return a JSON array of {kn, translit, en, box: [ymin, xmin, ymax, xmax]}.';
+
+      // clientApiKey belongs to the Kimi/OpenAI-compatible provider. Gemini
+      // fallback must use the server-side Gemini environment key instead.
+      const ai = getGenAIClient();
       if (!ai) {
-        res.status(200).json({ fallback: true, rawText: '' });
+        const apinexText = await callApinexServerVision(
+          cleanedBase64,
+          promptText
+        );
+        if (apinexText) {
+          res.json({ rawText: apinexText, provider: 'apinex' });
+        } else {
+          res.status(200).json({ fallback: true, rawText: '' });
+        }
         return;
       }
 
       const response = await generateContentWithFallback(
         ai,
         {
-          model: resolveBrainModel(model || 'gemini-3.8-flash'),
+          model: resolveBrainModel(model || 'gemini-3.5-flash-lite'),
           contents: [
             {
               role: 'user',
@@ -381,10 +470,7 @@ async function startServer() {
                   },
                 },
                 {
-                  text:
-                    typeof prompt === 'string' && prompt.trim()
-                      ? prompt
-                      : 'Find every distinct Kannada word, line, or short phrase in this image (including signs, bus boards, menus, banners, and news/meme captions) and return a JSON array of {kn, translit, en, box: [ymin, xmin, ymax, xmax]}.',
+                  text: promptText,
                 },
               ],
             },
@@ -425,6 +511,22 @@ async function startServer() {
 
       res.json({ rawText: response.text || '[]' });
     } catch (err: unknown) {
+      const apinexText = await callApinexServerVision(
+        typeof req.body?.imageBase64 === 'string'
+          ? req.body.imageBase64.startsWith('data:')
+            ? req.body.imageBase64
+                .slice(req.body.imageBase64.indexOf(',') + 1)
+                .trim()
+            : req.body.imageBase64.trim()
+          : '',
+        typeof req.body?.prompt === 'string' && req.body.prompt.trim()
+          ? req.body.prompt
+          : 'Find every distinct Kannada word, line, or short phrase in this image and return a JSON array of {kn, translit, en, box: [ymin, xmin, ymax, xmax]}. '
+      );
+      if (apinexText) {
+        res.json({ rawText: apinexText, provider: 'apinex' });
+        return;
+      }
       const errorObj = err as { status?: number; message?: string };
       if (
         errorObj?.status === 429 ||
@@ -469,15 +571,50 @@ async function startServer() {
         clientModel
       );
       if (openAiConfig.apiKey) {
-        const rawText = await requestAnnaOpenAiCompletion(
-          openAiConfig,
-          buildAnnaOpenAiMessages(userTranscript, history, persona)
-        );
-        res.json({ rawText, provider: 'kimi' });
-        return;
+        try {
+          const rawText = await requestAnnaOpenAiCompletion(
+            openAiConfig,
+            buildAnnaOpenAiMessages(userTranscript, history, persona)
+          );
+          res.json({ rawText, provider: 'kimi' });
+          return;
+        } catch (providerError) {
+          console.warn(
+            '[server /api/anna/chat] Kimi provider failed; trying Gemini fallback:',
+            providerError
+          );
+
+          // A stale browser key must not block a valid server-side key. Retry
+          // once with the deployment key before switching providers.
+          const serverConfig = getAnnaOpenAiConfig(
+            undefined,
+            clientBaseUrl,
+            clientModel
+          );
+          if (
+            serverConfig.apiKey &&
+            serverConfig.apiKey !== openAiConfig.apiKey
+          ) {
+            try {
+              const rawText = await requestAnnaOpenAiCompletion(
+                serverConfig,
+                buildAnnaOpenAiMessages(userTranscript, history, persona)
+              );
+              res.json({ rawText, provider: 'kimi' });
+              return;
+            } catch (serverProviderError) {
+              console.warn(
+                '[server /api/anna/chat] Server Kimi key failed; trying Gemini fallback:',
+                serverProviderError
+              );
+            }
+          }
+        }
       }
 
-      const ai = getGenAIClient(clientApiKey);
+      // clientApiKey belongs to the Kimi/OpenAI-compatible provider. Never
+      // pass it to Gemini as a fallback; use the server-side Gemini key.
+      const ai = getGenAIClient();
       if (!ai) {
         res.status(503).json({
           error:

@@ -1,5 +1,8 @@
 import { GoogleGenAI, Type, ThinkingLevel } from '@google/genai';
 
+const GEMINI_VISION_MODEL = 'gemini-3.5-flash-lite';
+const APINEX_VISION_MODELS = ['free/gemini-3.8-flash', 'free/kimi-k3'];
+
 function isPlaceholderKey(val?: string): boolean {
   if (!val) return true;
   const trimmed = val.trim();
@@ -9,9 +12,28 @@ function isPlaceholderKey(val?: string): boolean {
     trimmed === 'MY_GEMINI_API_KEY' ||
     trimmed === 'YOUR_DEMO_API_KEY_HERE' ||
     trimmed === 'YOUR_KIMI_K3_API_KEY' ||
+    trimmed === 'YOUR_APINEX_API_KEY' ||
     trimmed === '<key>' ||
     trimmed === 'YOUR_API_KEY'
   );
+}
+
+function firstConfiguredEnv(names: string[]): string {
+  for (const name of names) {
+    const value = process.env[name]?.trim();
+    if (value && !isPlaceholderKey(value)) return value;
+  }
+  return '';
+}
+
+function getApinexApiKey(): string {
+  return firstConfiguredEnv([
+    'APINEX_API_KEY',
+    'KIMI_API_KEY',
+    'KIMI_K3_API_KEY',
+    'ANNA_API_KEY',
+    'VITE_ANNA_DEFAULT_KEY',
+  ]);
 }
 
 function getGenAIClient(overrideKey?: string): GoogleGenAI | null {
@@ -45,6 +67,67 @@ function getThinkingConfigForModel(modelName: string) {
   return undefined;
 }
 
+async function callApinexServerVision(
+  cleanedBase64: string,
+  promptText: string,
+  apiKey: string
+): Promise<string | null> {
+  for (const model of APINEX_VISION_MODELS) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 24_000);
+    try {
+      const response = await fetch(
+        'https://api.apinex.bond/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  { type: 'text', text: promptText },
+                  {
+                    type: 'image_url',
+                    image_url: {
+                      url: `data:image/jpeg;base64,${cleanedBase64}`,
+                    },
+                  },
+                ],
+              },
+            ],
+            temperature: 0.1,
+          }),
+          signal: controller.signal,
+        }
+      );
+
+      if (!response.ok) continue;
+      const data = (await response.json()) as {
+        choices?: Array<{ message?: { content?: unknown } }>;
+      };
+      const raw = String(data?.choices?.[0]?.message?.content || '').trim();
+      const start = raw.indexOf('[');
+      const end = raw.lastIndexOf(']');
+      if (start !== -1 && end > start) {
+        const parsed = JSON.parse(raw.slice(start, end + 1));
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return JSON.stringify(parsed);
+        }
+      }
+    } catch {
+      // Try the next Apinex vision model.
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+  return null;
+}
+
 // Vercel / Serverless Node handler for POST /api/reader/scan
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default async function handler(req: any, res: any) {
@@ -66,17 +149,29 @@ export default async function handler(req: any, res: any) {
       ? imageBase64.slice(imageBase64.indexOf(',') + 1).trim()
       : imageBase64.trim();
 
+    const promptText =
+      typeof prompt === 'string' && prompt.trim()
+        ? prompt
+        : 'Find every distinct Kannada word, line, or short phrase in this image (including signs, bus boards, menus, banners, and news/meme captions) and return a JSON array of {kn, translit, en, box: [ymin, xmin, ymax, xmax]}.';
+
     const ai = getGenAIClient(clientApiKey);
+    const apinexKey = getApinexApiKey();
     if (!ai) {
-      res.status(200).json({ fallback: true, rawText: '' });
+      const apinexText = apinexKey
+        ? await callApinexServerVision(cleanedBase64, promptText, apinexKey)
+        : null;
+      if (apinexText) {
+        res.status(200).json({ rawText: apinexText, provider: 'apinex' });
+      } else {
+        res.status(200).json({ fallback: true, rawText: '' });
+      }
       return;
     }
 
     const fallbackModels = [
-      'gemini-3-flash-preview',
+      GEMINI_VISION_MODEL,
       'gemini-2.5-flash',
       'gemini-flash-latest',
-      'gemini-3.1-flash-lite-preview',
     ];
 
     const callModel = async (candidateModel: string, delayMs: number) => {
@@ -97,10 +192,7 @@ export default async function handler(req: any, res: any) {
                 },
               },
               {
-                text:
-                  typeof prompt === 'string' && prompt.trim()
-                    ? prompt
-                    : 'Find every distinct Kannada word, line, or short phrase in this image (including signs, bus boards, menus, banners, and news/meme captions) and return a JSON array of {kn, translit, en, box: [ymin, xmin, ymax, xmax]}.',
+                text: promptText,
               },
             ],
           },
@@ -157,11 +249,22 @@ export default async function handler(req: any, res: any) {
     try {
       const response = await Promise.any(
         fallbackModels.map((candidateModel, idx) =>
-          callModel(candidateModel, idx * 2500)
+          callModel(candidateModel, idx * 2000)
         )
       );
       res.status(200).json({ rawText: response.text || '[]' });
     } catch (aggErr: unknown) {
+      if (apinexKey) {
+        const apinexText = await callApinexServerVision(
+          cleanedBase64,
+          promptText,
+          apinexKey
+        );
+        if (apinexText) {
+          res.status(200).json({ rawText: apinexText, provider: 'apinex' });
+          return;
+        }
+      }
       if (aggErr instanceof AggregateError && aggErr.errors.length > 0) {
         const allEmpty = aggErr.errors.every(
           (e) => e instanceof Error && e.message.startsWith('Empty array []')

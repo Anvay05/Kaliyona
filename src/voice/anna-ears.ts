@@ -243,11 +243,15 @@ export async function startAnnaEarsPushToTalk(
 
       // Connect to Gemini Transcribe Live WebSocket bridge
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const keyParam =
-        VOICE_CONFIG.GEMINI_API_KEY &&
+      const browserGeminiKey =
         VOICE_CONFIG.GEMINI_API_KEY !== 'PASTE_KEY_HERE'
-          ? `&key=${encodeURIComponent(VOICE_CONFIG.GEMINI_API_KEY)}`
-          : '';
+          ? VOICE_CONFIG.GEMINI_API_KEY
+          : typeof import.meta !== 'undefined' && import.meta.env
+            ? (import.meta.env.VITE_GEMINI_API_KEY as string | undefined)
+            : '';
+      const keyParam = browserGeminiKey
+        ? `&key=${encodeURIComponent(browserGeminiKey)}`
+        : '';
       const wsUrl = `${protocol}//${window.location.host}/api/anna/live-transcribe?model=${encodeURIComponent(
         VOICE_CONFIG.TRANSCRIBE_MODEL
       )}${keyParam}`;

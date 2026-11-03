@@ -7,7 +7,7 @@ Practical spoken Kannada and Bengaluru Kanglish learning app built around real-l
 > **Reader = Gemini Vision with a bundled OCR fallback; Roleplay + Gallery + Lexicon = offline-first.**
 
 - **City Reader — Live Scan (Gemini + built-in OCR)**:
-  - Uses `@google/genai` (`gemini-3.8-flash` / `gemini-flash-latest`) via `/api/reader/scan` when a Gemini key is configured.
+  - Uses `@google/genai` (`gemini-3.5-flash-lite`) via `/api/reader/scan` when a Gemini key is configured, with Apinex multimodal fallback (`free/gemini-3.8-flash` / `free/kimi-k3`) when `APINEX_API_KEY` or `KIMI_API_KEY` is configured.
   - Falls back to bundled Tesseract Kannada/English OCR, the Kaliyona lexicon, and deterministic transliteration when no Gemini key is available, so the reader still opens without setup.
   - Renders in-place, auto-fitted translations over the original photo with a `[Translate | Original]` toggle and a portaled word-practice popover (`Bol ke sunao` + `Use in Roleplay`).
   - Automatically falls back to a graceful offline notice card with direct shortcuts to **Guided Gallery** and **Roleplay** when `navigator.onLine === false`.
@@ -28,8 +28,10 @@ Practical spoken Kannada and Bengaluru Kanglish learning app built around real-l
    ANNA_API_KEY=<your_kimi_k3_api_key>
    ANNA_BASE_URL=https://api.apinex.bond/v1
    ANNA_MODEL=free/kimi-k3
+   APINEX_API_KEY=<your_apinex_or_kimi_key>
+   APINEX_BASE_URL=https://api.apinex.bond/v1
    ```
-   `KIMI_API_KEY`/`KIMI_BASE_URL`/`KIMI_MODEL` are accepted aliases. `VITE_GEMINI_API_KEY` and `VITE_ANNA_DEFAULT_KEY` are also supported for local/browser fallback, but expose keys to users. Bundled Tesseract OCR works without a Gemini key.
+   `KIMI_API_KEY`/`KIMI_BASE_URL`/`KIMI_MODEL` are accepted aliases. `VITE_GEMINI_API_KEY` and `VITE_ANNA_DEFAULT_KEY` are supported for local/browser fallback, but expose keys to users. Do not commit `.env` or `.env.local`; Vercel serverless functions require these values in Vercel Environment Variables. Bundled Tesseract OCR works without AI keys.
 3. Run the development server:
    ```bash
    npm run dev

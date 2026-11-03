@@ -1,3 +1,5 @@
+import { GoogleGenAI } from '@google/genai';
+
 const ANNA_SYSTEM_PROMPT = `You are Anna, the friendly Kannada tutor in the Kaliyona app.
 
 Teach one short, practical Bengaluru Kannada phrase per reply. Return STRICT JSON only:
@@ -14,6 +16,7 @@ function isPlaceholderKey(value?: unknown): boolean {
     trimmed === 'MY_GEMINI_API_KEY' ||
     trimmed === 'YOUR_DEMO_API_KEY_HERE' ||
     trimmed === 'YOUR_KIMI_K3_API_KEY' ||
+    trimmed === 'YOUR_APINEX_API_KEY' ||
     trimmed === '<key>' ||
     trimmed === 'YOUR_API_KEY'
   );
@@ -25,6 +28,28 @@ function firstConfiguredEnv(names: string[]): string {
     if (value && !isPlaceholderKey(value)) return value;
   }
   return '';
+}
+
+function getGeminiClient(overrideKey?: string): GoogleGenAI | null {
+  const rawKey =
+    firstConfiguredEnv([
+      'GEMINI_API_KEY',
+      'GOOGLE_API_KEY',
+      'API_KEY',
+      'VITE_GEMINI_API_KEY',
+    ]) ||
+    (typeof overrideKey === 'string' && !isPlaceholderKey(overrideKey)
+      ? overrideKey.trim()
+      : '');
+
+  if (!rawKey) return null;
+  return new GoogleGenAI({
+    apiKey: rawKey,
+    httpOptions: {
+      timeout: 10_000,
+      headers: { 'User-Agent': 'aistudio-build' },
+    },
+  });
 }
 
 function getEndpoint(baseUrl: string): string {
@@ -110,70 +135,96 @@ export default async function handler(req: any, res: any) {
     }
 
     const apiKey =
-      (typeof clientApiKey === 'string' && !isPlaceholderKey(clientApiKey)
-        ? clientApiKey.trim()
-        : '') ||
       firstConfiguredEnv([
         'ANNA_API_KEY',
         'KIMI_API_KEY',
         'KIMI_K3_API_KEY',
+        'APINEX_API_KEY',
         'ANNA_DEFAULT_KEY',
         'VITE_ANNA_DEFAULT_KEY',
-      ]);
-
-    if (!apiKey) {
-      res.status(503).json({
-        error:
-          'Anna provider is not configured. Set ANNA_API_KEY or KIMI_API_KEY in Vercel Environment Variables.',
-      });
-      return;
-    }
+      ]) ||
+      (typeof clientApiKey === 'string' && !isPlaceholderKey(clientApiKey)
+        ? clientApiKey.trim()
+        : '');
 
     const baseUrl =
+      firstConfiguredEnv(['ANNA_BASE_URL', 'KIMI_BASE_URL', 'APINEX_BASE_URL']) ||
       (typeof clientBaseUrl === 'string' ? clientBaseUrl.trim() : '') ||
-      firstConfiguredEnv(['ANNA_BASE_URL', 'KIMI_BASE_URL']) ||
       'https://api.apinex.bond/v1';
     const modelName =
-      (typeof clientModel === 'string' ? clientModel.trim() : '') ||
       firstConfiguredEnv(['ANNA_MODEL', 'KIMI_MODEL']) ||
+      (typeof clientModel === 'string' ? clientModel.trim() : '') ||
       'free/kimi-k3';
 
-    const providerResponse = await fetch(getEndpoint(baseUrl), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: modelName,
-        messages: buildMessages(userTranscript, history, persona),
-        temperature: 0.7,
-      }),
-    });
-    const providerBody = await providerResponse.text();
+    if (apiKey) {
+      try {
+        const providerResponse = await fetch(getEndpoint(baseUrl), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: modelName,
+            messages: buildMessages(userTranscript, history, persona),
+            temperature: 0.7,
+          }),
+        });
+        const providerBody = await providerResponse.text();
 
-    if (!providerResponse.ok) {
-      res.status(providerResponse.status).json({
-        error: `Anna provider returned HTTP ${providerResponse.status}: ${providerBody.slice(0, 240)}`,
+        if (providerResponse.ok) {
+          const data = JSON.parse(providerBody) as {
+            choices?: Array<{ message?: { content?: unknown } }>;
+          };
+          const rawText = data?.choices?.[0]?.message?.content;
+          if (typeof rawText === 'string' && rawText.trim()) {
+            res.status(200).json({ rawText: rawText.trim(), provider: 'kimi' });
+            return;
+          }
+        }
+      } catch {
+        // Try the server-side Gemini fallback below.
+      }
+    }
+
+    // clientApiKey is the Kimi/OpenAI-compatible credential. Never pass it to
+    // Gemini as a fallback; use the server-side Gemini environment key only.
+    const ai = getGeminiClient();
+    if (ai) {
+      const contents: Array<{
+        role: 'user' | 'model';
+        parts: Array<{ text: string }>;
+      }> = [];
+      const recentHistory = Array.isArray(history) ? history.slice(-8) : [];
+      for (const turn of recentHistory) {
+        if (!turn || typeof turn !== 'object' || !turn.text) continue;
+        contents.push({
+          role: turn.role === 'user' ? 'user' : 'model',
+          parts: [{ text: String(turn.text) }],
+        });
+      }
+      contents.push({ role: 'user', parts: [{ text: userTranscript }] });
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.5-flash-lite',
+        contents,
+        config: {
+          systemInstruction: ANNA_SYSTEM_PROMPT,
+          responseMimeType: 'application/json',
+          temperature: 0.6,
+        },
+      });
+      res.status(200).json({
+        rawText: response.text || '{}',
+        provider: 'gemini',
       });
       return;
     }
 
-    let data: { choices?: Array<{ message?: { content?: unknown } }> };
-    try {
-      data = JSON.parse(providerBody) as typeof data;
-    } catch {
-      res.status(502).json({ error: 'Anna provider returned invalid JSON.' });
-      return;
-    }
-
-    const rawText = data?.choices?.[0]?.message?.content;
-    if (typeof rawText !== 'string' || !rawText.trim()) {
-      res.status(502).json({ error: 'Anna provider returned an empty response.' });
-      return;
-    }
-
-    res.status(200).json({ rawText: rawText.trim(), provider: 'kimi' });
+    res.status(503).json({
+      error:
+        'Anna provider is not configured. Set ANNA_API_KEY/KIMI_API_KEY and GEMINI_API_KEY in Vercel Environment Variables.',
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     res.status(500).json({ error: message });

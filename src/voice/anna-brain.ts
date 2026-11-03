@@ -870,10 +870,20 @@ async function callClientSideGemini(
   history: AnnaChatTurn[],
   persona?: AnnaPersonaContext | null
 ): Promise<AnnaBrainReply | null> {
-  const apiKey =
+  const rawCandidate =
     VOICE_CONFIG.GEMINI_API_KEY ||
+    (typeof import.meta !== 'undefined' && import.meta.env
+      ? (import.meta.env.VITE_GEMINI_API_KEY as string)
+      : '') ||
     (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : '') ||
     '';
+  const apiKey =
+    rawCandidate &&
+    rawCandidate !== 'PASTE_KEY_HERE' &&
+    rawCandidate !== 'MY_GEMINI_API_KEY' &&
+    rawCandidate !== 'YOUR_DEMO_API_KEY_HERE'
+      ? rawCandidate.trim()
+      : '';
   if (!apiKey) return null;
 
   const ai = new GoogleGenAI({ apiKey });
@@ -896,7 +906,7 @@ async function callClientSideGemini(
       ? `${ANNA_SYSTEM_PROMPT}\n\nROLEPLAY CONTEXT: You are currently roleplaying as "${persona.title}" (${persona.tagline || 'Bengaluru local'}) in Bengaluru (${persona.setting || 'local spot'}). Stay in character while following all conversational and language mirroring rules above.`
       : ANNA_SYSTEM_PROMPT;
 
-  const candidateModels = ['gemini-3-flash-preview', 'gemini-2.5-flash'];
+  const candidateModels = ['gemini-3.5-flash-lite', 'gemini-2.5-flash'];
   for (const m of candidateModels) {
     try {
       const response = await ai.models.generateContent({

@@ -53,6 +53,7 @@ function loadBuiltInDefaultKey(): string {
     !trimmed ||
     trimmed === 'YOUR_DEMO_API_KEY_HERE' ||
     trimmed === 'YOUR_KIMI_K3_API_KEY' ||
+    trimmed === 'YOUR_APINEX_API_KEY' ||
     trimmed === 'MY_GEMINI_API_KEY' ||
     trimmed === 'PASTE_KEY_HERE' ||
     trimmed === '<key>' ||
@@ -669,6 +670,7 @@ export async function sendAnnaChatCompletion(
 ): Promise<AnnaAiReply> {
   const config = getAiConfig();
   const { apiKey } = resolveEffectiveApiKey();
+  const builtInApiKey = getBuiltInDefaultApiKey();
   const baseUrl = cleanBaseUrl(config.baseUrl);
   const isPollinations = isZeroKeyFallback(baseUrl);
 
@@ -708,49 +710,68 @@ export async function sendAnnaChatCompletion(
     // and the Express dev server. Static hosts without the route fall back to
     // the direct request below.
     if (!isPollinations) {
-      try {
-        const proxyResponse = await fetch('/api/anna/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userTranscript: userMessage,
-            history: recentTurns,
-            clientApiKey: apiKey,
-            clientBaseUrl: baseUrl,
-            clientModel: config.model || ANNA_MODEL,
-          }),
-          signal: controller.signal,
-        });
+      const proxyKeys = [
+        apiKey,
+        ...(builtInApiKey && builtInApiKey !== apiKey ? [builtInApiKey] : []),
+      ].filter((key, index, keys) => key && keys.indexOf(key) === index);
+      let proxyRouteAvailable = true;
 
-        if (proxyResponse.ok) {
-          const proxyData = (await proxyResponse.json()) as { rawText?: string };
-          if (!proxyData.rawText?.trim()) {
-            throw new Error('Anna proxy returned an empty response.');
+      for (const proxyKey of proxyKeys) {
+        if (!proxyRouteAvailable) break;
+        try {
+          const proxyResponse = await fetch('/api/anna/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userTranscript: userMessage,
+              history: recentTurns,
+              clientApiKey: proxyKey,
+              clientBaseUrl: baseUrl,
+              clientModel: config.model || ANNA_MODEL,
+            }),
+            signal: controller.signal,
+          });
+
+          if (proxyResponse.ok) {
+            const proxyData = (await proxyResponse.json()) as { rawText?: string };
+            if (!proxyData.rawText?.trim()) {
+              throw new Error('Anna proxy returned an empty response.');
+            }
+            window.clearTimeout(timeoutId);
+            return parseAnnaModelResponse(proxyData.rawText);
           }
-          window.clearTimeout(timeoutId);
-          return parseAnnaModelResponse(proxyData.rawText);
-        }
 
-        // A 404/405 means this is a static host without the serverless route;
-        // use the direct OpenAI-compatible request as a compatibility fallback.
-        if (proxyResponse.status !== 404 && proxyResponse.status !== 405) {
+          // A 404/405 means this is a static host without the serverless
+          // route; use the direct OpenAI-compatible request below.
+          if (proxyResponse.status === 404 || proxyResponse.status === 405) {
+            proxyRouteAvailable = false;
+            break;
+          }
+
           const proxyBody = await proxyResponse.text().catch(() => '');
-          throw new Error(
+          const error = new Error(
             getProviderErrorMessage(
               proxyResponse.status,
               proxyResponse.statusText,
               proxyBody
             )
           );
+          if (proxyKey === proxyKeys[proxyKeys.length - 1]) {
+            throw error;
+          }
+        } catch (proxyError: unknown) {
+          if (proxyError instanceof DOMException && proxyError.name === 'AbortError') {
+            throw proxyError;
+          }
+          if (proxyError instanceof Error && /^HTTP \d+/.test(proxyError.message)) {
+            if (proxyKey === proxyKeys[proxyKeys.length - 1]) {
+              throw proxyError;
+            }
+            continue;
+          }
+          // Static hosting or an unavailable local proxy: continue directly.
+          proxyRouteAvailable = false;
         }
-      } catch (proxyError: unknown) {
-        if (proxyError instanceof DOMException && proxyError.name === 'AbortError') {
-          throw proxyError;
-        }
-        if (proxyError instanceof Error && /^HTTP \d+/.test(proxyError.message)) {
-          throw proxyError;
-        }
-        // Static hosting or an unavailable local proxy: continue directly.
       }
     }
 
