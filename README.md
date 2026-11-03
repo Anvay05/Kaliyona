@@ -1,4 +1,4 @@
-# Kaliyona — Speak Kannada, Own Bengaluru
+# Kaliyona — Speak Kannada Bengaluru Style
 
 Practical spoken Kannada & Bengaluru Kanglish learning app built around real-life situations (auto rides, darshinis, PG conversations, office small talk, and street signs).
 
